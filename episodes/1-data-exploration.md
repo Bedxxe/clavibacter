@@ -1,8 +1,7 @@
 # Clavibacter project
 
-<a href="clavibacter/figures/grecas-mitla1.png">
-  <img src="clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." />
-</a>
+<img src="clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." />
+
 
 ## First steps on exploring the data
 
