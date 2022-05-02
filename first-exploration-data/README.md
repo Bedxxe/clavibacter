@@ -290,30 +290,80 @@ $ tree -L 2
 ~~~
 {: .output}
 
+Each folder inside `kraken/` contains it's respective `.kraken` and `.report` file. 
+Inside the `reports/` folder are all the reports from all the samples that the 
+script processed.
+
+Now, we can do this same process with each of the `capsicum` folders. Inside `miscelaneous-capsicum` and `newberry-2020` folders, I will use the next line of code to obtain the desired results:
 
 ~~~
+$ sh kraken-reads.sh metadata/SraRunTable.txt /home/betterlab/kraken2/database/db_kraken2
+~~~
+{: .bash}
 
+And for the `newberry-2020`, the next one.
+If we expore what it is inside these two folders, we will see the results are 
+there:
+
+~~~
+$ for i in miscelaneous-capsicum newberry-2020; do echo -e "\n"; tree $i -L 3; done
 ~~~
 {: .bash}
 
 ~~~
 
-~~~
-{: .output}
+
+miscelaneous-capsicum
+├── kraken-reads.sh
+├── metadata
+│   ├── run-labels.txt
+│   ├── SraRunTable.txt
+│   └── SRR_Acc_List.txt
+├── reads
+│   ├── ERR5639101-1.fastq
+│   ├── ERR5639101-2.fastq
+│   ├── SRR13319509-1.fastq
+│   ├── SRR13319509-2.fastq
+│   ├── SRR13319510-1.fastq
+│   ├── SRR13319510-2.fastq
+│   ├── SRR13319511-1.fastq
+│   └── SRR13319511-2.fastq
+└── taxonomy
+    ├── kraken
+    │   ├── ERR5639101
+    │   ├── reports
+    │   ├── SRR13319509
+    │   ├── SRR13319510
+    │   └── SRR13319511
+    └── taxonomy-logs
+        └── scripts
+
+11 directories, 12 files
 
 
+newberry-2020
+├── kraken-reads.sh
+├── metadata
+│   ├── run-labels.txt
+│   ├── SraRunTable.txt
+│   └── SRR_Acc_List.txt
+├── reads
+│   ├── SRR10527387-1.fastq
+│   ├── SRR10527387-2.fastq
+│   ├── SRR10527388-1.fastq
+│   ├── SRR10527388-2.fastq
+│   ├── SRR10527389-1.fastq
+│   └── SRR10527389-2.fastq
+└── taxonomy
+    ├── kraken
+    │   ├── reports
+    │   ├── SRR10527387
+    │   ├── SRR10527388
+    │   └── SRR10527389
+    └── taxonomy-logs
+        └── scripts
 
-
-
-
-
-~~~
-
-~~~
-{: .bash}
-
-~~~
-
+10 directories, 10 files
 ~~~
 {: .output}
 
