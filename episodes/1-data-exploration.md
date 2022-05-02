@@ -4,13 +4,10 @@ title: "First exploration of the data "
 ---
 
 # Clavibacter project
-
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
-
 ## First steps on exploring the data
 
 <img src="/clavibacter/figures/bw-hokusai.jpg" alt="Black and white representation of a wave made by Hokusai." >
-
 ### Introductions
 
 I was invited to participate in a project to uncover the presence of a group of bacterial lineajes from the genus 
