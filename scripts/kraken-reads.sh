@@ -6,7 +6,7 @@
 #SraRunTable is located, 2) where the kraken database has been saved, and 
 # 3) a sufix that you want for the files to have (from the biom file)
 
-metd=$1 #Location to the SRR_Acc_List.txt file
+metd=$1 #Location to the SraRunTable.txt
 kdat=$2 #Location of the kraken2 database
 sufx=$3 #The choosen suffix for some files
 root=$(pwd) #Gets the path to the directory of this file, on which the outputs ought to be created 
