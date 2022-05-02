@@ -1,7 +1,7 @@
 # Clavibacter project
 
-<a href="{{ page.root }}/figures/grecas-mitla1.png">
-  <img src="{{ page.root }}/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." />
+<a href="clavibacter/figures/grecas-mitla1.png">
+  <img src="clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." />
 </a>
 
 ## First steps on exploring the data
