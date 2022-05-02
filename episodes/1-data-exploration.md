@@ -53,6 +53,7 @@ next two lists of data was given by the team:
 
 |-------------------+-------------------------------------------------------------------------------------------------------------------|   
 | Plant                                               |  Number of samples     | Type of data  | Link to the data | 
+|-------------------+-------------------------------------------------------------------------------------------------------------------|
 | _Medicago sativa_| 18 | 16S  | [Link](https://www.ncbi.nlm.nih.gov/sra/?term=Medicago+sativa+metagenomic+NOT+(amplicon)+NOT+(RNA)) | 
 |-------------------+-------------------------------------------------------------------------------------------------------------------|   
 | _Zea mays_ | 41 | Shotgun | [Link](https://www.ncbi.nlm.nih.gov/sra/?term=metagenomics+zea+mays+NOT+(amplicon)+NOT+(RNA)+NOT+(PCR)+NOT+(454)) | 
