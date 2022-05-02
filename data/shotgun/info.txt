@@ -1,0 +1,6 @@
+Here are going to be located the data from the five plants in their respective folders:
+Capsicum
+Lycopersicum
+Triticum
+Tuberosum
+Zea mays
