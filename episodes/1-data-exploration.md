@@ -1,3 +1,8 @@
+---
+source: md
+title: "First exploration of the data "
+---
+
 # Clavibacter project
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
