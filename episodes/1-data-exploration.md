@@ -27,6 +27,7 @@ next two lists of data was given by the team:
 
 |-------------------+-------------------------------------------------------------------------------------------------------------------|   
 | Plant                                               |  Number of samples     | Type of data  | Link to the data | Paper| 
+|-------------------+-------------------------------------------------------------------------------------------------------------------|
 | _Solanum lycopersicum_| 13 | Shotgun | [Link](https://www.ncbi.nlm.nih.gov/sra?linkname=bioproject_sra_all&from_uid=603603)| Barajas et al., 2020|
 |-------------------+-------------------------------------------------------------------------------------------------------------------|   
 | _Zea mays_| 5| Shotgun | [Link](https://www.ncbi.nlm.nih.gov/sra/?term=PRJNA645385) |Xiong et al., 2021|
