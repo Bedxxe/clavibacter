@@ -5,8 +5,8 @@
 
 ## First steps on exploring the data
 
-<a href="{{ page.root }}/figures/bw-hokusai.jpg">
-  <img src="{{ page.root }}/figures/bw-hokusai.jpg" alt="Black and white representation of a wave made by Hokusai" >
+<a href="/clavibacter/figures/bw-hokusai.jpg">
+  <img src="/clavibacter/figures/bw-hokusai.jpg" alt="Black and white representation of a wave made by Hokusai" >
 </a>
 
 ### Introductions
