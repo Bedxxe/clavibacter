@@ -1,0 +1,1 @@
+All the data from this project is going to be located here. The structure is going to be to divide the data by according to the metagenomic sequencing technique i.e. shotgun and 16S.
