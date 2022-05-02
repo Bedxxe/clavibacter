@@ -2,12 +2,9 @@
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
 
-
 ## First steps on exploring the data
 
-<a href="/clavibacter/figures/bw-hokusai.jpg">
-  <img src="/clavibacter/figures/bw-hokusai.jpg" alt="Black and white representation of a wave made by Hokusai" >
-</a>
+<img src="/clavibacter/figures/bw-hokusai.jpg" alt="Black and white representation of a wave made by Hokusai." >
 
 ### Introductions
 
