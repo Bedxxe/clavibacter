@@ -21,7 +21,7 @@ mkdri -p taxonomy/biom-files
 # DOWNLOADING THE DATA
 
 #Let's use the next piece of code to download the data
-cat $metd  |  sed -n '1!p' | while read line; do fasterq-dump -S $line -p -e 8 -o $line ; done
+cat $metd  |  sed -n '1!p' | while read line;  do read=$(echo $line | cut -d',' -f1); fasterq-dump -S $read -p -e 8 -o $read ; done
 mv *.fastq reads/
 
 # MANAGING THE DATA
