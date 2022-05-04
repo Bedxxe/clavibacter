@@ -1,0 +1,393 @@
+---
+source: md
+title: "16S database exploration"
+---
+
+
+# Clavibacter project
+
+## Exploring the different kraken 16S databases
+
+[kraken2](https://github.com/DerrickWood/kraken2) has the option to create databases 
+of 16S using the information from three different repositories:
+* [Greengenes](https://greengenes.lbl.gov/Download/)
+* [RPD](http://rdp.cme.msu.edu/)
+* [Silva](https://www.arb-silva.de/)
+
+I will use the data obtained from [_Medicago sativa_](https://www.ncbi.nlm.nih.gov/sra/?term=Medicago+sativa+metagenomic+NOT+(amplicon)+NOT+(RNA)) to explore if there 
+are any substantial differences between the taxonomic assignation using each of the 
+three databases.
+
+### Downloading the database
+
+I prepared a folder named kraken with the next structure to download and index the 
+16S databases:
+
+~~~
+$ tree -L 2
+~~~
+{: .bash}
+
+~~~
+.
+└── database
+    ├── datab03242022
+    ├── gg04082022
+    ├── rdp04082022
+    └── silva04082022
+~~~
+{: .output}
+
+Each of the three folders inside the `database` folder will contain a different 
+set of data. The date corresponds to the date that this databases were created 
+since progess in bacterial taxonomic classification can bring substantial changes 
+in the future.
+
+As an example, I used the next piece of code to download the `Greengenes` dataset:
+
+~~~
+$ kraken2-build --db gg04082022 --special greengenes --threads 12
+~~~
+{: .bash}
+
+### Downloading the data 
+
+Let's first downloaded them from the [SRA](https://www.ncbi.nlm.nih.gov/Traces/study/?query_key=1&WebEnv=MCID_623f3b7a6ab7df183b59c2ab&o=acc_s%3Aa) repository in NCBI. 
+I will download the metadata table and the Accesion table. With the Accseion table I will use SRA-toolkit to download the 16S reads. I have created a 
+folder structure inside the `clavibacter/16S` main folder as follows:
+
+~~~
+$ tree -L 2
+~~~
+{: .bash}
+
+~~~
+.
+├── 16-S.Rproj
+├── 16S-metadata
+│   ├── m-wu-2021-SRR_Acc_List.txt
+│   ├── m-wu-2021-SraRunTable.txt
+│   ├── miscellaneous-SRR_Acc_List.txt
+│   ├── miscellaneous-SraRunTable.txt
+│   ├── miscellaneous-tuberosum-SRR_Acc_List.txt
+│   ├── miscellaneous-tuberosum-SraRunTable.txt
+│   ├── shi-2019-SRR_Acc_List.txt
+│   └── shi-2019-SraRunTable.txt
+├── medicago-sativa
+│   ├── kraken-reads-v032822.sh
+│   ├── kraken-reads-v042822.sh
+│   ├── miscellaneous
+│   ├── miscellaneous-SRR_Acc_List.txt
+│   └── miscellaneous-SraRunTable.txt
+├── tuberosum
+│   ├── miscellaneous-tuberosum
+│   ├── miscellaneous-tuberosum-SRR_Acc_List.txt
+│   ├── miscellaneous-tuberosum-SraRunTable.txt
+│   ├── shi-2019
+│   ├── shi-2019-SRR_Acc_List.txt
+│   └── shi-2019-SraRunTable.txt
+└── zea-mayz
+    ├── m-wu-2021
+    ├── m-wu-2021-SRR_Acc_List.txt
+    └── m-wu-2021-SraRunTable.txt
+~~~
+{: .output}
+
+In this folder, I have downloaded and allocated all the metadata from the links 
+provided by my team. I will move to the `medicago-sativa/miscellaneous` subfolder 
+were I will download the data from the NCBI with the next command:
+
+~~~
+$ cat metadata/SRR_Acc_List.txt | while read line; do fasterq-dump $line -S -p -e 12; done
+$ ls *.fastq | wc -l
+~~~
+{: .bash}
+
+~~~
+36
+~~~
+{: .output}
+
+Now, we have both the forward and reverse reads to begin to work with them. I am going to create a new folder to hoard the reads files and move the `.fastq` files 
+there. I will call this folder `reads`. 
+
+I want to use the information 
+inside the metadata table `SraRunTable.txt` to run the kraken commands, and also 
+to use it to run all the other programs that I will be using along this analysis.
+Let's see the structure of the file:
+~~~
+$ head -n 5 metadata/SraRunTable.txt
+~~~
+{: .bash}
+
+~~~
+Run,Assay Type,AvgSpotLen,Bases,BioProject,BioSample,BioSampleModel,Bytes,Center Name,Collection_date,Consent,DATASTORE filetype,DATASTORE provider,DATASTORE region,env_broad_scale,env_local_scale,env_medium,Experiment,geo_loc_name_country,geo_loc_name_country_continent,geo_loc_name,HOST,Instrument,Lat_Lon,Library Name,LibraryLayout,LibrarySelection,LibrarySource,Organism,Platform,ReleaseDate,Sample Name,SRA Study
+SRR15081053,WGS,494,29845998,PRJNA745034,SAMN20130882,"MIMS.me,MIGS/MIMS/MIMARKS.plant-associated",9181503,HEBEI UNIVERSITY,2019-08,public,"fastq,sra","gs,ncbi,s3","gs.US,ncbi.public,s3.us-east-1",plant,not collected,alfalfa,SRX11391104,China,Asia,"China:Hengshui City\,Hebei Province",Medicago sativa,Illumina MiSeq,37.24 N 115.10 E,ZTPSN19DC056,PAIRED,PCR,METAGENOMIC,metagenome,ILLUMINA,2021-07-09T00:00:00Z,G5_3,SRP327582
+SRR15081054,WGS,495,33718905,PRJNA745034,SAMN20130881,"MIMS.me,MIGS/MIMS/MIMARKS.plant-associated",10544648,HEBEI UNIVERSITY,2019-08,public,"fastq,sra","gs,ncbi,s3","gs.US,ncbi.public,s3.us-east-1",plant,not collected,alfalfa,SRX11391103,China,Asia,"China:Hengshui City\,Hebei Province",Medicago sativa,Illumina MiSeq,37.23 N 115.10 E,ZTPSN19DC055,PAIRED,PCR,METAGENOMIC,metagenome,ILLUMINA,2021-07-09T00:00:00Z,G5_2,SRP327582
+SRR15081056,WGS,492,36556092,PRJNA745034,SAMN20130880,"MIMS.me,MIGS/MIMS/MIMARKS.plant-associated",11372290,HEBEI UNIVERSITY,2019-08,public,"fastq,sra","gs,ncbi,s3","gs.US,ncbi.public,s3.us-east-1",plant,not collected,alfalfa,SRX11391101,China,Asia,"China:Hengshui City\,Hebei Province",Medicago sativa,Illumina MiSeq,37.22 N 115.10 E,ZTPSN19DC054,PAIRED,PCR,METAGENOMIC,metagenome,ILLUMINA,2021-07-09T00:00:00Z,G5_1,SRP327582
+SRR15081057,WGS,493,33555059,PRJNA745034,SAMN20130879,"MIMS.me,MIGS/MIMS/MIMARKS.plant-associated",10652197,HEBEI UNIVERSITY,2019-08,public,"fastq,sra","gs,ncbi,s3","gs.US,ncbi.public,s3.us-east-1",plant,not collected,alfalfa,SRX11391100,China,Asia,"China:Hengshui City\,Hebei Province",Medicago sativa,Illumina MiSeq,37.21 N 115.10 E,ZTPSN19DC053,PAIRED,PCR,METAGENOMIC,metagenome,ILLUMINA,2021-07-09T00:00:00Z,G2_3,SRP327582
+~~~
+{: .output}
+
+If I use the next piece of code, I can obtain the first column of all the rows, 
+which is the Run information, the same name that each forward and reverse reads 
+files has.
+
+~~~
+$ cat metadata/SraRunTable.txt| sed -n '1!p' | while read line; do read=$(echo $line | cut -d',' -f1); echo $read;done
+~~~
+{: .bash}
+
+~~~
+SRR15081053
+SRR15081054
+SRR15081056
+SRR15081057
+SRR15081058
+SRR15081059
+SRR15081060
+SRR15081061
+SRR15081062
+SRR15081076
+SRR15081078
+SRR15081079
+SRR15081080
+SRR15081081
+SRR15081082
+SRR15081083
+SRR15081084
+SRR15081085
+~~~
+{: .output}
+
+This is going to be useful also to obtain all the other columns of information 
+inside the `SraRunTable.txt` file.
+
+### Taxonomic assignation with the three databases
+
+In order to correctly annotate with the three different databases, I will create a 
+folder where I will save the output of each of the processes with kraken2. I will 
+create the `greengenes`, `rdp`, and `silva` folders to serve this purpose. 
+
+I prepared a little program that will obtain the needed information from each read 
+to run the kraken2 algorithm and to allocate the outputs in different folders: 
+`kraken-reads.sh`. This script can be locates on the [scripts folder]() of this repository.
+Let's see what is inside:
+~~~
+$ cat kraken-reads.sh
+~~~
+{: .bash}
+
+~~~
+#!/bin/sh
+# This is a program that is going to pick a SraRunTable of metadata and
+#extract the run label to run the next programs.
+
+# This program requires that you give 3 input data. 1) where this
+#SraRunTable is located, 2) where the kraken database has been saved,
+#and 3) where the reads are located.
+
+metd=$1 #Location to the SraRunTable.txt file
+kdat=$2 #Location of the kraken2 database
+runs=$3 #Location where the reads are hoarded. Without the / symbol
+root=$(pwd) #Gets the path to the directory of this file, on which the outputs ought to be created
+
+# We will change the names of the reads files. They have a sufix that makes impossible
+#to be read in a loop
+ls $runs | while read line ; do new=$(echo $line | sed 's/_/-/g'); mv $runs/$line $runs/$new; done
+
+# Now, we will create a file where the information of the run labes can be located
+cat $metd | sed -n '1!p' | while read line; do read=$(echo $line | cut -d',' -f1); echo $read ; done > run-labels.txt
+mv run-labels.txt metadata/
+
+mkdir -p taxonomy/kraken
+mkdir -p taxonomy/taxonomy-logs/scripts
+mkdir -p taxonomy/kraken/reports
+
+cat metadata/run-labels.txt | while read line; do mkdir taxonomy/kraken/$line; file1=$(echo $runs/$line-1.fastq); file2=$(echo $runs/$line-2.fastq) ; echo '\n''working in run' "$line"\
+#kraken2 --db $kdat --threads 12 --paired $file1 $file2 --output taxonomy/kraken/$line/$line.kraken --report taxonomy/kraken/$line/$line.report \
+echo '#!/bin/sh''\n''\n'"kraken2 --db $kdat --threads 12 --paired" "$runs/$line"'-1.fastq' "$runs/$line"'-2.fastq' "--output taxonomy/kraken/$line/$line.kraken --report taxonomy/kraken/$line/$line.report" > taxonomy/taxonomy-logs/scripts/$line-kraken.sh; sh taxonomy/taxonomy-logs/scripts/$line-kraken.sh \
+cp taxonomy/kraken/$line/$line.report taxonomy/kraken/reports;done
+~~~
+{: .output}
+
+There are somethings that I would like to highlight on this little program. As it says in the first lines, you will need to provide it with 1) the location of your 
+`SraRunTable.txt` file, 2) the location of your `kraken2` database, and 3) location where you located your reads. This program will create in your actual directory 
+the folders where the outputs are going to be allocated and little pieces of code in the `taxonomy-logs/scripts` folder that were used to run `kraken2` on each 
+pair of reads.
+
+The 26th line is commented because I could not made `kraken2` to run inside the `while loop`. If you can find any solutions or any improvements, please let me know.
+
+You can always change the number of threads to be used.
+
+So, in my case I am going to run it with the following command to run kraken2 with 
+the `Greengenes` database:
+~~~
+$ sh kraken-reads.sh metadata/SraRunTable.txt /mnt/d/programs/kraken/database/gg04082022 reads
+~~~
+{: .bash}
+~~~
+working in run SRR15081053
+reads/SRR15081053-1.fastq reads/SRR15081053-2.fastq
+Loading database information... done.
+60417 sequences (29.85 Mbp) processed in 3.700s (979.6 Kseq/m, 483.93 Mbp/m).
+  60403 sequences classified (99.98%)
+  14 sequences unclassified (0.02%)
+
+working in run SRR15081054
+reads/SRR15081054-1.fastq reads/SRR15081054-2.fastq
+Loading database information... done.
+68119 sequences (33.72 Mbp) processed in 3.412s (1197.9 Kseq/m, 592.97 Mbp/m).
+  68109 sequences classified (99.99%)
+  10 sequences unclassified (0.01%)
+~~~
+{: .output}
+
+The resulting output is telling us that `kraken2` is running on the files that 
+we gave to the program. It will take a several minutes to process this set of 18 samples.
+
+In the end, we will have new content inside our new `taxonomy` folder:
+~~~
+$ tree -L 2
+~~~
+{: .bash}
+
+~~~
+.
+├── kraken
+│   ├── SRR15081054
+│   ├── SRR15081056
+│   ├── SRR15081057
+│   ├── SRR15081058
+│   ├── SRR15081059
+│   ├── SRR15081060
+│   ├── SRR15081061
+│   ├── SRR15081062
+│   ├── SRR15081076
+│   ├── SRR15081078
+│   ├── SRR15081079
+│   ├── SRR15081080
+│   ├── SRR15081081
+│   ├── SRR15081082
+│   ├── SRR15081083
+│   ├── SRR15081084
+│   ├── SRR15081085
+│   └── reports
+└── taxonomy-logs
+    └── scripts
+~~~
+{: .output}
+
+Inside the `reports` subfolder we can find all the resulting kraken-reports. I am 
+going to copy the information inside `taxonomy` to the `greengenes` folder to 
+continue with the new database and not re-write the information.
+
+After running this code a third time with the `Silva` database, I have all the required information. 
+
+### Using kraken-tools to create biom files
+
+[kraken-biom](https://github.com/smdabdoub/kraken-biom) is a useful program that 
+can take different `kraken-reports` to assemble a biom file. I am going to create 
+a biom file inside each of the databases folders to begin wiht the analysis. The 
+next line of code can be used to create the one inside the `greengenes` folder:
+
+~~~
+$ kraken-biom kraken/reports/* -o greengenes.biom --fmt json
+$ ls *.biom
+~~~
+{: .bash}
+
+~~~
+greengenes.biom
+~~~
+{: .output}
+
+I will do the same for the rest.
+
+### A broad comparison of the 3 databases
+
+
+
+
+### Using Graphlan to create plots to compare the taxonomic assignation
+
+I have wrote a [markdown](https://bedxxe.github.io/From-kraken-to-graphlan/) explaining the process to use the `kraken` outputs to plot 
+a dendogram using `graphlan`. I will use that knowledge to plot what I obtained 
+from the three different databases. To do an example, I am going to use the results 
+from Silva.
+
+Inside the `silva/` folder I created a new folder called `grap/` where all the 
+data generated will be located. There, I will use the next line to create `mpa` 
+files:
+~~~
+$ mkdir mpa-files
+$ ls ../kraken/reports/ | while read line; do name=$(echo $line | cut -d'.' -f1); kreport2mpa.py -r ../kraken/reports/$line -o mpa-files/$name.mpa; done
+$ ls mpa-files/
+~~~
+{: .bash}
+
+~~~
+SRR15081053.mpa  SRR15081058.mpa  SRR15081062.mpa  SRR15081080.mpa  SRR15081084.mpa
+SRR15081054.mpa  SRR15081059.mpa  SRR15081076.mpa  SRR15081081.mpa  SRR15081085.mpa
+SRR15081056.mpa  SRR15081060.mpa  SRR15081078.mpa  SRR15081082.mpa  
+SRR15081057.mpa  SRR15081061.mpa  SRR15081079.mpa  SRR15081083.mpa
+~~~
+{: .output}
+
+With this information, I will combine all into a big file called `combine.mpa`
+~~~
+$ combine_mpa.py --input mpa-files/*.mpa --output mpa-files/combine.mpa
+~~~
+{: .bash}
+
+~~~
+ Number of files to parse: 18
+ Number of classifications to write: 2762
+        2762 classifications printed
+~~~
+{: .output}
+
+I will use the [script](https://github.com/Bedxxe/clavibacter/tree/main/scripts) `silva-grafla.sh` to generate the figure of the silva database.
+~~~
+$ sh silva-grafla.sh
+~~~
+{: .bash}
+
+~~~
+Output files saved inside grap-files folder
+Color for Bacteroidetes changed from 02d19ff to 0e6ab02
+Color for Actinobacteria changed from 029cc36 to 0e7298a
+Color for Firmicutes changed from 0ff3333 to 0d95f03
+Color for Cyanobacteria changed from 000bfff to 01b9e77
+Color for Bacteroidetes changed from 000ff80 to 07570b3
+Generating the .png file
+~~~
+{: .output}
+
+Finally, we obtained the desired image:
+
+<img src="/clavibacter/figures/silva-graphlan_graph.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
+<em> Figure 2. Cladogram using Silva database <em/>
+
+<img src="/clavibacter/figures/silva-graphlan_graph_annot.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
+<em> Figure 3. The legend of the dominant Phyla in the Silva plot <em/>
+
+<img src="/clavibacter/figures/silva-graphlan_graph_legend.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
+<em> Figure 4. The legend of the dominant Genera in the Silva plot <em/>
+
+I will do the same for `Greengenes` and `RDP` databases with their own 
+[scripts](https://github.com/Bedxxe/clavibacter/tree/main/scripts), `green-grafla.sh` and `rdp-grafla.sh`.
+
+Here is the comparative of the three generated dendograms:
+<img src="/clavibacter/figures/comparing-databases.png" alt="Dendograms of all the three databases together to compare them. A corresponds to Greengenes, B to RDP, and C to Silva" >
+<em> Figure 5. Comparation of taxonomic classification between databases. A Greengenes. B RDP. C Silva <em/>
+
+~~~
+
+~~~
+{: .bash}
+
+~~~
+
+~~~
+{: .output}
