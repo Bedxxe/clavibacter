@@ -478,6 +478,50 @@ information.
 <img src="/clavibacter/figures/phyla-present.png" alt="Heatmap where each of the squares inside is depicitng if the correspondig database in the x-axis had identified the Phyla on the y-axis. If the color is black, it means that it the database could not identity that Phylum." >
 <em> Figure 2. Heatmap pf the Phyla idenfitied by each database <em/>
 
+I would like to see how much *Clavibacter* reads were identified by each database. 
+I will extract the *Clavibacter* data from all the phyloseq objects and trim the 
+blanck space on Greengenes were no Species were identified:
+
+~~~
+> cla.silva <- subset_taxa(silva, Genus == "Clavibacter")
+> cla.rdp <- subset_taxa(rdp, Genus == "Clavibacter")
+> cla.greeng <- subset_taxa(greeng, Genus == "Clavibacter")
+> cla.greeng@tax_table@.Data[1,7] <- "NotIdentified"
+~~~
+{: .language-r}
+
+And I will use this information to draw a new bar-plot:
+
+~~~
+> #Dataframe of the Clavibacter OTUs
+> clavi <- data.frame(DataB = c("Silva","RDP","Greeng"),
+                    OTUs = c(sum(sample_sums(cla.silva)),sum(sample_sums(cla.rdp)),
+                             sum(sample_sums(cla.greeng))))
+> # Plotting
+> ggplot(data = clavi, aes(y = OTUs, x = DataB, fill= DataB))+
+    geom_bar(stat="identity", position=position_dodge())+
+    scale_fill_brewer(type = "",palette = "Set2", aesthetics = "fill")+
+    theme_bw() + theme(text = element_text(size = 30))
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/clavi-otus.png" alt="Bar-plot of the quantity of OTUS detected by each of the three databases. As can be seen, Greengenes was the one that identified more OTUs of this bacterial group of interest" >
+<em> Figure 3. Bar-plot of *Clavibacter* OTUs <em/>
+
+Finally, I would like to see how the *Clavibacter* OTUs are distributed on the 
+Greengenes results, since this database was able to reach the Species level.
+
+~~~
+> plot_heatmap(cla.greeng, taxa.label = "Species") +
+    theme_bw() + theme(text = element_text(size = 30))+
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/heat-clavi.png" alt="Heatmap pf the Clavibacter OTUs detected. As can be seen, no othe Species was identified apart from michiganensis. This was true for all the samples" >
+<em> Figure 4. Heatmap of Greengenes assignation of *Clavibacter* Species <em/>
+
+
 ### Using Graphlan to create plots to compare the taxonomic assignation
 
 I have wrote a [markdown](https://bedxxe.github.io/From-kraken-to-graphlan/) explaining the process to use the `kraken` outputs to plot 
@@ -536,29 +580,18 @@ Generating the .png file
 Finally, we obtained the desired image:
 
 <img src="/clavibacter/figures/silva-graphlan_graph.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 3. Cladogram using Silva database <em/>
+<em> Figure 5. Cladogram using Silva database <em/>
 
 <img src="/clavibacter/figures/silva-graphlan_graph_annot.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 4. The legend of the dominant Phyla in the Silva plot <em/>
+<em> Figure 6. The legend of the dominant Phyla in the Silva plot <em/>
 
 <img src="/clavibacter/figures/silva-graphlan_graph_legend.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 5. The legend of the dominant Genera in the Silva plot <em/>
+<em> Figure 7. The legend of the dominant Genera in the Silva plot <em/>
 
 I will do the same for `Greengenes` and `RDP` databases with their own 
 [scripts](https://github.com/Bedxxe/clavibacter/tree/main/scripts), `green-grafla.sh` and `rdp-grafla.sh`.
 
 Here is the comparative of the three generated dendograms:
 <img src="/clavibacter/figures/comparing-databases.png" alt="Dendograms of all the three databases together to compare them. A corresponds to Greengenes, B to RDP, and C to Silva" >
-<em> Figure 5. Comparation of taxonomic classification between databases. A Greengenes. B RDP. C Silva <em/>
+<em> Figure 8. Comparation of taxonomic classification between databases. A Greengenes. B RDP. C Silva <em/>
 
-
-
-~~~
-
-~~~
-{: .bash}
-
-~~~
-
-~~~
-{: .output}
