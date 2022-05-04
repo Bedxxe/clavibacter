@@ -3,10 +3,12 @@ source: md
 title: "16S database exploration"
 ---
 
-
 # Clavibacter project
+<img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
 
 ## Exploring the different kraken 16S databases
+
+<img src="/clavibacter/figures/fuji-from-the-platform-of-sasayedo.jpg" >
 
 [kraken2](https://github.com/DerrickWood/kraken2) has the option to create databases 
 of 16S using the information from three different repositories:
