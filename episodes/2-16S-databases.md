@@ -205,6 +205,7 @@ mv run-labels.txt metadata/
 mkdir -p taxonomy/kraken
 mkdir -p taxonomy/taxonomy-logs/scripts
 mkdir -p taxonomy/kraken/reports
+mkdir -p taxonomy/biom-files
 
 cat metadata/run-labels.txt | while read line; do mkdir taxonomy/kraken/$line; file1=$(echo $runs/$line-1.fastq); file2=$(echo $runs/$line-2.fastq) ; echo '\n''working in run' "$line"\
 #kraken2 --db $kdat --threads 12 --paired $file1 $file2 --output taxonomy/kraken/$line/$line.kraken --report taxonomy/kraken/$line/$line.report \
@@ -418,16 +419,64 @@ And use the next code to create a bar-plot:
 <img src="/clavibacter/figures/database-comparison.png" alt="bar-plot of the OTU quantity according to each of the three databases used. The color on each bar depicts if the database was able to classify to the species level, green for the one who did it (i.e. greengenes) and dark-orange for the ones that did not." >
 <em> Figure 1. Bar-plot of the number of OTUs classified for each database <em/>
 
+The number of reads deceted is important, but it is also important which OTUs can 
+be detected with each of the databases. I am going to see which Phyla are being 
+detected by each of the three databases.
+I am going to generate a dataframe to allocate this information:
 
 ~~~
-
+> unique(greeng@tax_table@.Data[,1])
 ~~~
 {: .language-r}
 
 ~~~
-
+[1] "Bacteria" "Archaea" 
 ~~~
 {: .output}
+
+~~~
+> unique(rdp@tax_table@.Data[,1])
+~~~
+{: .language-r}
+
+~~~
+[1] "Bacteria" "Archaea"
+~~~
+{: .output}
+
+~~~
+> unique(silva@tax_table@.Data[,1])
+~~~
+{: .language-r}
+
+~~~
+[1] "Bacteria"    "Holozoa"     "Eukaryota"   "Nucletmycea" "Archaea" 
+~~~
+{: .output}
+
+~~~
+> heat.fra <- data.frame(DataB = c(rep(x = "Silva", times = 5),rep(x = "RDP", times = 5),
+                                 rep(x = "Greeng", times = 5)),
+                       Phyla = rep(x = unique(silva@tax_table@.Data[,1]), times = 3),
+                       Presence = c(1,1,1,1,1,
+                                    1,0,0,0,1,
+                                    1,0,0,0,1))
+~~~
+{: .language-r}
+
+With this information, I will use again `ggplot2` to create a plot to show this 
+information.
+
+~~~
+> ggplot(data = heat.fra, mapping = aes(y= Phyla, x = DataB)) +
+    geom_tile(aes(fill = Presence), colour = "grey", size = 2) +
+    scale_fill_gradient(high = "#5ab4ac" ,low = "#000000" )+
+    theme_bw() + theme(text = element_text(size = 30))
+~~~
+{: .output}
+
+<img src="/clavibacter/figures/phyla-present.png" alt="Heatmap where each of the squares inside is depicitng if the correspondig database in the x-axis had identified the Phyla on the y-axis. If the color is black, it means that it the database could not identity that Phylum." >
+<em> Figure 2. Heatmap pf the Phyla idenfitied by each database <em/>
 
 ### Using Graphlan to create plots to compare the taxonomic assignation
 
@@ -487,13 +536,13 @@ Generating the .png file
 Finally, we obtained the desired image:
 
 <img src="/clavibacter/figures/silva-graphlan_graph.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 2. Cladogram using Silva database <em/>
+<em> Figure 3. Cladogram using Silva database <em/>
 
 <img src="/clavibacter/figures/silva-graphlan_graph_annot.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 3. The legend of the dominant Phyla in the Silva plot <em/>
+<em> Figure 4. The legend of the dominant Phyla in the Silva plot <em/>
 
 <img src="/clavibacter/figures/silva-graphlan_graph_legend.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 4. The legend of the dominant Genera in the Silva plot <em/>
+<em> Figure 5. The legend of the dominant Genera in the Silva plot <em/>
 
 I will do the same for `Greengenes` and `RDP` databases with their own 
 [scripts](https://github.com/Bedxxe/clavibacter/tree/main/scripts), `green-grafla.sh` and `rdp-grafla.sh`.
@@ -501,6 +550,8 @@ I will do the same for `Greengenes` and `RDP` databases with their own
 Here is the comparative of the three generated dendograms:
 <img src="/clavibacter/figures/comparing-databases.png" alt="Dendograms of all the three databases together to compare them. A corresponds to Greengenes, B to RDP, and C to Silva" >
 <em> Figure 5. Comparation of taxonomic classification between databases. A Greengenes. B RDP. C Silva <em/>
+
+
 
 ~~~
 
