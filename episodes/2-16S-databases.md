@@ -294,8 +294,8 @@ a biom file inside each of the databases folders to begin wiht the analysis. The
 next line of code can be used to create the one inside the `greengenes` folder:
 
 ~~~
-$ kraken-biom kraken/reports/* -o greengenes.biom --fmt json
-$ ls *.biom
+$ kraken-biom kraken/reports/* -o ../bioms/greengenes.biom --fmt json
+$ ls ../bioms/*.biom
 ~~~
 {: .bash}
 
@@ -308,8 +308,126 @@ I will do the same for the rest.
 
 ### A broad comparison of the 3 databases
 
+For the next section I will use RSutido to analize the taxonomic classification 
+made by the three databases. I will use the next set of packages for this and 
+future analyses on R:
+
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+| Package| Version | Link|
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+|Phyloseq|1.36.0| [Page](https://joey711.github.io/phyloseq/) |
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+|ggplot2|3.3.5| [Page](https://ggplot2.tidyverse.org/) |
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+|edgeR|3.34.1| [Page](https://bioconductor.org/packages/release/bioc/html/edgeR.html) |
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+|DESeq2|1.32.0| [Page](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) |
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+|pheatmap|1.0.12| [Page](https://www.rdocumentation.org/packages/pheatmap/versions/1.0.12/topics/pheatmap) |
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+|RColorBrewer|1.1.2| [Page](https://cran.r-project.org/web/packages/RColorBrewer/index.html) |
+|-------------------+-----------------------------------------------------------------------------------------------------------------| 
+
+First of all, I load this package into my RStudio environmnet:
+
+~~~
+> library("phyloseq")
+> library("ggplot2")
+> library("edgeR")
+> library("DESeq2")
+> library("pheatmap")
+> library("RColorBrewer")
+~~~
+{: .language-r}
+
+I will use the function `import_biom` to load the `biom` files that I created .
+First I will do this with the Silva results and prune the data.
+
+~~~
+> silva <- import_biom("medicago-sativa/miscellaneous/bioms/silva.biom")
+> silva@tax_table@.Data <- substring(silva@tax_table@.Data, 4)
+> colnames(silva@tax_table@.Data) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+~~~
+{: .language-r}
+
+I will do the same for the RPD and Greengenes data:
+~~~
+> ## The object obtained by pdp
+> rdp <- import_biom("medicago-sativa/miscellaneous/bioms/rdp.biom")
+> # Prunning the data
+> rdp@tax_table@.Data <- substring(rdp@tax_table@.Data, 4)
+> colnames(rdp@tax_table@.Data) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+
+> ## The object obtained by greengenes
+> greeng <- import_biom("medicago-sativa/miscellaneous/bioms/greengenes.biom")
+> # Prunning the data
+> greeng@tax_table@.Data <- substring(greeng@tax_table@.Data, 4)
+> colnames(greeng@tax_table@.Data) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+
+~~~
+{: .language-r}
+
+With this three objects on the phyloseq format, I will create a dataframe to 
+allocate some metadata concerning the name of the database, the number of OTUS 
+detected, how many non-bacterial OTUS the database detected, the number of unique 
+Phyla found, and if the clasiffication with that database allowed the 
+species identification of the OTUS:
+
+~~~
+> c.datab <- data.frame(row.names = c("Silva","RDP","Greeng"),
+                      DataB = c("Silva","RDP","Greeng"),
+                      OTUs = c(sum(sample_sums(silva)),sum(sample_sums(rdp)),
+                               sum(sample_sums(greeng))),
+                      NonBacteria = c(summary(silva@tax_table@.Data[,1] == "Bacteria")[2],
+                                      summary(rdp@tax_table@.Data[,1] == "Bacteria")[2],
+                                      summary(greeng@tax_table@.Data[,1] == "Bacteria")[2]),
+                      Phyla = c(summary(unique(silva@tax_table@.Data[,2]))[1],
+                                  summary(unique(rdp@tax_table@.Data[,2]))[1],
+                                  summary(unique(greeng@tax_table@.Data[,2]))[1]),
+                      Species= c("Na","Na","Yes"))
+> c-datab
+~~~
+{: .language-r}
+
+~~~
+        DataB    OTUs NonBacteria Phylums Species
+Silva   Silva 1168242          82      59      Na
+RDP       RDP  842365           6      42      Na
+Greeng Greeng 1200912           9      36     Yes
+~~~
+{: .output}
+
+To look at this data in a graphical way, I will generate a plot. First I will 
+choose which color I want to use with the next two lines:
+
+~~~
+> spe.color <- palette.colors(n = 2, palette = "Dark2")
+> names(spe.color)<- c("Yes","Na")
+~~~
+{: .language-r}
+
+And use the next code to create a bar-plot:
+~~~
+> ggplot(data = c.datab, aes(y = OTUs, x = DataB, fill = Species))+
+    geom_bar(stat="identity", position=position_dodge())+
+    scale_fill_manual(values = spe.color)+
+    theme_bw() + theme(text = element_text(size = 20))
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/database-comparison.png" alt="bar-plot of the OTU quantity according to each of the three databases used. The color on each bar depicts if the database was able to classify to the species level, green for the one who did it (i.e. greengenes) and dark-orange for the ones that did not." >
+<em> Figure 1. Bar-plot of the number of OTUs classified for each database <em/>
 
 
+~~~
+
+~~~
+{: .language-r}
+
+~~~
+
+~~~
+{: .output}
 
 ### Using Graphlan to create plots to compare the taxonomic assignation
 
