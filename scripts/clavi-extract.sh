@@ -9,5 +9,5 @@
 
 mkdir -p reads/clavi/
 
-cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$line-clav-1.fq -o2 reads/clavi/$line-clav-2.fq -t 1573; done
+cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$line-clav-1.fq -o2 reads/clavi/$line-clav-2.fq -t 1573 --fastq-output; done
 
