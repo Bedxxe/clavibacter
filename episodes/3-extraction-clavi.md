@@ -155,7 +155,7 @@ $ cat clavi-extract.sh
 
 mkdir -p reads/clavi/
 
-cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$line-clav-1.fq -o2 reads/clavi/$line-clav-2.fq -t 1573; done
+cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$line-clav-1.fq -o2 reads/clavi/$line-clav-2.fq -t 1573 --fastq-output; done
 ~~~
 {: .output}
 
@@ -251,7 +251,7 @@ mkdir -p reads/cmm/
 # With the next piece of code, the reads clasiffied as from the Clavibacter michiganensis michiganensis, will be separated from the main reads. 
 # The number needed for the extraction is the numeric-ID given to Cmm by kraken2: 33013
 
-cat metadata/run-labels.txt | while read line; do echo "\nExtracting Cmm reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/cmm/clavi-$line-1.fq -o2 reads/cmm/clavi-$line-2.fq -t 33013; done
+cat metadata/run-labels.txt | while read line; do echo "\nExtracting Cmm reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/cmm/clavi-$line-1.fq -o2 reads/cmm/clavi-$line-2.fq -t 33013 --fastq-output; done
 ~~~
 {: .output}
 
@@ -337,14 +337,14 @@ kraken-biom taxonomy/kraken/reports/* --fmt json -o taxonomy/biom-files/$sufx.bi
 # With the next piece of code, the reads clasiffied as from the genus "Clavibacter", will be separated from the main reads. 
 # The number needed for the extraction is the numeric-ID given to Clavibacter by kraken2: 1573
 
-cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/clavi-$line-1.fq -o2 reads/clavi/clavi-$line-2.fq -t 1573; done
+cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/clavi-$line-1.fq -o2 reads/clavi/clavi-$line-2.fq -t 1573 --fastq-output; done
 
 # EXTRACTING THE CLAVIBACTER MICHIGANESIS-MICHIGANENSIS READS
 
 # With the next piece of code, the reads clasiffied as from the Clavibacter michiganensis michiganensis, will be separated from the main reads. 
 # The number needed for the extraction is the numeric-ID given to Cmm by kraken2: 33013
 
-cat metadata/run-labels.txt | while read line; do echo "\nExtracting Cmm reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/cmm/clavi-$line-1.fq -o2 reads/cmm/clavi-$line-2.fq -t 33013; done
+cat metadata/run-labels.txt | while read line; do echo "\nExtracting Cmm reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/cmm/clavi-$line-1.fq -o2 reads/cmm/clavi-$line-2.fq -t 33013 --fastq-output; done
 ~~~
 {: .output}
 
