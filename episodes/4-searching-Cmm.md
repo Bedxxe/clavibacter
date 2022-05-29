@@ -168,7 +168,7 @@ I will take the _Capsicum_ data to do a first try. As I explored the data, I
 became aware that in the _Capsicum_ samples, one of the dominant OTUs was 
 [_Agrobacterium tumefaciens_](https://github.com/Bedxxe/clavibacter/blob/main/data/outgrups/Agrobacterium_tumefaciens_LN-1.fna) :
 
-<img src="/clavibacter/figures/shimomeguro.jpg" >
+<img src="/clavibacter/figures/capsicum-tuberosum-exp.png" >
 <em> Figure 1. Barplot of dominant OTUs from _Capsicum_ and _Tuberosum_ libraries <em/>
 
 
