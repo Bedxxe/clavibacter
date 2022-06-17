@@ -10,7 +10,7 @@ title: "Extraction of Clavibacter reads"
 
 <img src="/clavibacter/figures/the-fuji-seen-from-the-mishima-pass.jpg" >
 
-The focus of this project os to obtain and analize the diversity of *Clavibacter* lineages living with the already mentioned plants.
+The focus of this project is to obtain and analize the diversity of *Clavibacter* lineages living with the already mentioned plants.
 I am going to use the [kraken-tools](https://github.com/jenniferlu717/KrakenTools) 
 set of scripts. Specifically, I will `use extract_kraken_reads.py` script to obtain 
 specific reads from the entire library. 
@@ -124,12 +124,23 @@ extraction. Now, with the next line, I will extract *Clavibacter* reads from thi
 library:
 
 ~~~
-$ extract_kraken_reads.py -k taxonomy/kraken/krakens/SRR12778013.kraken -s1 reads/SRR12778013-1.fastq -s2 reads/SRR12778013-2.fastq -o reads/clavi/SRR12778013-clav-1.fq -o2 reads/clavi/SRR12778013-clav-2.fq -t 1573
+$ extract_kraken_reads.py -k taxonomy/kraken/krakens/SRR12778013.kraken -r taxonomy/kraken/reports/SRR12778013.report -s1 reads/SRR12778013-1.fastq -s2 reads/SRR12778013-2.fastq -o reads/clavi/SRR12778013-clav-1.fq -o2 reads/clavi/SRR12778013-clav-2.fq -t 1573 --fastq-output --include-children
 ~~~
 {: .bash}
 
 ~~~
-
+PROGRAM START TIME: 05-06-2022 17:33:10
+        1 taxonomy IDs to parse
+>> STEP 1: PARSING KRAKEN FILE FOR READIDS taxonomy/kraken/krakens/SRR12778013.kraken
+        69.07 million reads processed
+        84 read IDs saved
+>> STEP 2: READING SEQUENCE FILES AND WRITING READS
+        84 read IDs found (68.66 mill reads processed)
+        84 read IDs found (68.66 mill reads processed)
+        84 reads printed to file
+        Generated file: reads/clavi/SRR12778013-clav-1.fq
+        Generated file: reads/clavi/SRR12778013-clav-2.fq
+PROGRAM END TIME: 05-06-2022 18:44:52
 ~~~
 {: .output}
 
@@ -155,7 +166,10 @@ $ cat clavi-extract.sh
 
 mkdir -p reads/clavi/
 
-cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$line-clav-1.fq -o2 reads/clavi/$line-clav-2.fq -t 1573 --fastq-output; done
+cat metadata/run-labels.txt | while read line;
+do echo "\nExtracting Clavibacter reads from sample:" $line;
+extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/kraken/reports/$line.report -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$line-clav-1.fq -o2 reads/clavi/$line-clav-2.fq -t 1573 --fastq-output --include-children; done
+
 ~~~
 {: .output}
 
@@ -337,7 +351,9 @@ kraken-biom taxonomy/kraken/reports/* --fmt json -o taxonomy/biom-files/$sufx.bi
 # With the next piece of code, the reads clasiffied as from the genus "Clavibacter", will be separated from the main reads. 
 # The number needed for the extraction is the numeric-ID given to Clavibacter by kraken2: 1573
 
-cat metadata/run-labels.txt | while read line; do echo "\nExtracting Clavibacter reads from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/clavi-$line-1.fq -o2 reads/clavi/clavi-$line-2.fq -t 1573 --fastq-output; done
+cat metadata/run-labels.txt | while read line;
+do echo "\nExtracting Clavibacter reads from sample:" $line;
+extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/kraken/reports/$line.report -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$line-clav-1.fq -o2 reads/clavi/$line-clav-2.fq -t 1573 --fastq-output --include-children; done
 
 # EXTRACTING THE CLAVIBACTER MICHIGANESIS-MICHIGANENSIS READS
 
