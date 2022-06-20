@@ -146,6 +146,8 @@ I will load the needed packages to work with this data:
 > library("pheatmap")
 > library("RColorBrewer")
 > library("stringr")
+> library("tidyverse")
+> library("vegan")
 ~~~
 {: .language-r}
 
@@ -357,7 +359,81 @@ Plotting the obtained data:
 
 <img src="/clavibacter/figures/sol-04.png" >
 
+We can also see how much they differ according to the zone from where the samples 
+were taken:
+~~~
+> ggplot(data = sol.c.fra, mapping = aes(y= ClaRelative, x = Sample, fill = Species, color = Cultivo))+
+    geom_bar(position = "stack", stat = "identity", size=1.5)+
+    scale_color_manual(values = c("#d95f02","#1b9e77","#7570b3"))+
+    facet_wrap(~Origen) +
+    theme(text = element_text(size= 12),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/sol-04.png" >
+
+### Multivatiate analysis
+
+First, we will re-assign the metadata to a nwe object to use it in the analysis:
+~~~
+> meta.sol <- read.csv2("../../solena/nelly/metadata/fastp_metadat.csv",
+                      header =  TRUE, row.names = 1, sep = ",")
+# Trimming the sample names:
+> rownames(meta.sol) <- substring(rownames(meta.sol),first = 13)
+~~~
+{: .language-r}
+
+We will take the data inside the Otu table of solena, and we will transpose the data inside the data.frame to be used in vegan
+
+~~~
+> d.solena <- t(solena@otu_table@.Data)
+~~~
+{: .language-r}
+
+We will use the `adonis()` function tha comes with the `vegan` package to do the 
+multivariate analysis:
+
+
+~~~
+> adonis(d.solena ~ Cultivo , data = meta.sol, permutations = 999)
+~~~
+{: .language-r}
+
+
+~~~
+Call:
+adonis(formula = d.solena ~ Cultivo, data = meta.sol, permutations = 999) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
+Cultivo    2    0.3060 0.152982  1.6091 0.08647  0.123
+Residuals 34    3.2326 0.095076         0.91353       
+Total     36    3.5386                  1.00000       
+~~~
+{: .output}
+
+It seems that the diversity of OTUs is not well correlated with the plant that 
+was extracted from
+
+~~~
+
+~~~
+{: .language-r}
+
+~~~
+
+~~~
+{: .language-r}
+
 ### Beta diversity
+
+
 
 ~~~
 
