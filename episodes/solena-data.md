@@ -132,7 +132,7 @@ $ kraken-biom reports/* --fmt json -o biom-files/solena.biom
 
 This now can be read by RStudio and the package [`phyloseq`](https://joey711.github.io/phyloseq/)
 
-## Analysis with R
+## Analyzing the data with R
 
 ### Loading and trimming the data
 
@@ -300,18 +300,64 @@ And we can plot the result with the next line of code:
 ~~~
 {: .language-r}
 
-<img src="/clavibacter/figures/sol-01.png" >
+<img src="/clavibacter/figures/sol-02.png" >
 
+### _Clavibacter_ 
+
+To observe the abundance of _Clavibacter_ inside the data, we will first extract 
+the information belonging to this group of OTUs to a new object from the `solena` 
+dataset:
 
 ~~~
+> sol.cla <- subset_taxa(solena, Genus == "Clavibacter")
+~~~
+{: .language-r}
 
+We want to know the number of reads that belongs to this:
+
+~~~
+> sol.c.fra <- psmelt(sol.cla)
+# reordering the factors
+> sol.c.fra $Sample <- as.factor(sol.c.fra $Sample)
+> sol.c.fra  <- arrange(.data = sol.c.fra , sol.c.fra $Cultivo)
+> sol.c.fra $Sample <- factor(sol.c.fra $Sample, levels = unique(sol.c.fra $Sample))
 ~~~
 {: .language-r}
 
 ~~~
+> ggplot(data = sol.c.fra, mapping = aes(y= Abundance, x = Sample, fill = Species, color = Cultivo))+
+    geom_bar(position = "stack", stat = "identity", size=1)+
+    scale_color_manual(values = c("#d95f02","#1b9e77","#7570b3"))+
+    #facet_wrap(~Cultivo)
+    theme(text = element_text(size= 25),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 ~~~
 {: .language-r}
+
+<img src="/clavibacter/figures/sol-03.png" >
+
+If we want to see how much is this of the total number of reads:
+~~~
+> sol.c.fra$ClaRelative <- sample_sums(sol.cla)/sample_sums(solena)
+~~~
+{: .language-r}
+
+Plotting the obtained data:
+
+~~~
+> ggplot(data = sol.c.fra, mapping = aes(y= ClaRelative, x = Sample, fill = Species, color = Cultivo))+
+    geom_bar(position = "stack", stat = "identity", size=1.5)+
+    scale_color_manual(values = c("#d95f02","#1b9e77","#7570b3"))+
+    #facet_wrap(~Cultivo)
+    theme(text = element_text(size= 25),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/sol-04.png" >
+
+### Beta diversity
 
 ~~~
 
