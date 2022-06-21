@@ -372,7 +372,7 @@ were taken:
 ~~~
 {: .language-r}
 
-<img src="/clavibacter/figures/sol-04.png" >
+<img src="/clavibacter/figures/sol-05.png" >
 
 ### Multivatiate analysis
 
@@ -385,51 +385,95 @@ First, we will re-assign the metadata to a nwe object to use it in the analysis:
 ~~~
 {: .language-r}
 
-We will take the data inside the Otu table of solena, and we will transpose the data inside the data.frame to be used in vegan
+Also, the NAs in the metadata will be removed to unknown data so as to preclude an 
+error from the `adonis` function:
 
 ~~~
-> d.solena <- t(solena@otu_table@.Data)
+meta.sol[is.na(meta.sol)] = "Unknown"
 ~~~
 {: .language-r}
 
-We will use the `adonis()` function tha comes with the `vegan` package to do the 
-multivariate analysis:
-
+We will evaluate the data with a PERMANOVA test around all the taxonomica 
+levels. We first begin with Phylum. We will use the `tax_glom()` function to 
+cut up to the phylum level. From this new `phyloseq` object, we will extract the 
+OTU information from the `otu_table` and we will transpose it:
 
 ~~~
-> adonis(d.solena ~ Cultivo , data = meta.sol, permutations = 999)
+> p.sol <- tax_glom(solena,taxrank = rank_names(solena)[2])
+> p.solena <- t(p.sol@otu_table@.Data)
+~~~
+{: .language-r}
+
+We will use the `adonis()` function that comes with the `vegan` package to do the 
+multivariate analysis:
+
+~~~
+adonis(p.solena ~ Cultivo , data = meta.sol, permutations = 9999, method = "bray")
 ~~~
 {: .language-r}
 
 
 ~~~
 Call:
-adonis(formula = d.solena ~ Cultivo, data = meta.sol, permutations = 999) 
+adonis(formula = p.solena ~ Cultivo, data = meta.sol, permutations = 9999,      method = "bray") 
 
 Permutation: free
-Number of permutations: 999
+Number of permutations: 9999
 
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-Cultivo    2    0.3060 0.152982  1.6091 0.08647  0.123
-Residuals 34    3.2326 0.095076         0.91353       
-Total     36    3.5386                  1.00000       
+Cultivo    2   0.27408 0.137041  1.7609 0.09386 0.1261
+Residuals 34   2.64596 0.077822         0.90614       
+Total     36   2.92004                  1.00000   
 ~~~
 {: .output}
 
 It seems that the diversity of OTUs is not well correlated with the plant that 
-was extracted from
+was extracted at the phylum level.
+
+Since we have the information of the phenological stages when the plant was sampled 
+we can try to see how much the OTU diversity change with a nested design where the 
+phenological stages are nested inside the plant host (Cultivo). We will use the 
+`strata` option from `adonis` to accomplish this.
 
 ~~~
-
+adonis(p.solena ~ Cultivo/Etapa_fenologica , data = meta.sol, permutations = 9999, 
+       method = "bray", strata = meta.sol$Cultivo)
 ~~~
 {: .language-r}
 
 ~~~
+Call:
+adonis(formula = p.solena ~ Cultivo/Etapa_fenologica, data = meta.sol,      permutations = 9999, method = "bray", strata = meta.sol$Cultivo) 
 
+Blocks:  strata 
+Permutation: free
+Number of permutations: 9999
+
+Terms added sequentially (first to last)
+
+                         Df SumsOfSqs  MeanSqs F.Model
+Cultivo                   2   0.27408 0.137041  1.8186
+Cultivo:Etapa_fenologica  7   0.61133 0.087332  1.1589
+Residuals                27   2.03463 0.075357        
+Total                    36   2.92004                 
+                              R2 Pr(>F)
+Cultivo                  0.09386 0.1931
+Cultivo:Etapa_fenologica 0.20936 0.1931
+Residuals                0.69678       
+Total                    1.00000   
 ~~~
-{: .language-r}
+{: .output}
+
+Next, there are two tables where the results for each taxonomic level is shown:
+
+
+<img src="/clavibacter/figures/sol-06.png" >
+
+
+<img src="/clavibacter/figures/sol-07.png" >
+
 
 ### Beta diversity
 
