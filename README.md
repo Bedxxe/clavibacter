@@ -8,7 +8,7 @@ Episodes:
 
 https://bedxxe.github.io/clavibacter/episodes/1-data-exploration.html
 
-https://bedxxe.github.io/clavibacter/episodes/2-Taxonomic assignation.html
+https://bedxxe.github.io/clavibacter/episodes/2-Taxonomic-assignation.html
 
 https://bedxxe.github.io/clavibacter/episodes/3-Taxonomic-exploration-R.html
 
