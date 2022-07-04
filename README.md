@@ -1,6 +1,6 @@
 # Clavibacter Project
 
-<img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
+![grecas-mitla1](https://user-images.githubusercontent.com/67386612/177206178-e3f3a9ff-608c-4fce-bd58-aa4b29ef6990.png)
 
 I was invited to participate in a project to uncover the presence of a group of bacterial lineajes from the genus 
 _Clavibacter_ in different cultivars. As planned by my Sensei (Professor Nelly Selem-Mojica), we will use 
