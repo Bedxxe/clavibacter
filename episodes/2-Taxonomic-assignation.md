@@ -29,7 +29,7 @@ the directory's location in during the next steps:
 ~~~
 $ pwd
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 /mnt/d/programs/kraken/database
@@ -45,7 +45,7 @@ $ kraken2-build --download-library bacteria --db datab03242022
 $ kraken2-build --download-library fungi --db datab03242022
 $ kraken2-build --download-library viral --db datab03242022
 ~~~
-{: .bash}
+{: .language-bash}
 
 I named the database with the date it was assembled to have a record of this and 
 be aware when it is convenient to update it. Secondly, I downloaded the taxonomy 
@@ -54,14 +54,14 @@ information:
 ~~~
 $ kraken2-build --download-taxonomy --db datab03242022
 ~~~
-{: .bash}
+{: .language-bash}
 
 Finally, I build the database:
 
 ~~~
 $ kraken2-build --build --db datab03242022
 ~~~
-{: .bash}
+{: .language-bash}
 
 All this process took my hardware (SSD, 64 RAM memory, 16 cores) close to 36 hours.
 
@@ -77,14 +77,14 @@ outputs that we will obtain from kraken:
 $ mkdir -p taxonomy/kraken/reports
 $ mkdir -p taxonomy/kraken/krakens
 ~~~
-{: .bash}
+{: .language-bash}
 
 We will use the next line to run the `kraken2` algorith with, using the "recently" 
 created database:
 ~~~
 $ kraken2 --db /mnt/d/programs/kraken/database/database/datab03242022 --threads 8 --paired reads/SRR12778013-1.fastq reads/SRR12778013-2.fastq --output taxonomy/kraken/krakens/SRR12778013.kraken --report taxonomy/kraken/krakens/SRR12778013.report
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 reads/SRR12778013-1.fastq reads/SRR12778013-2.fastq
@@ -100,7 +100,7 @@ Now, we have our first result from the first library:
 ~~~
 $ head -n 15 taxonomy/kraken/reports/SRR12778013.report
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
  95.30  65820224        65820224        U       0       unclassified
@@ -131,7 +131,7 @@ Let's see what is new inside:
 ~~~
 $ cat kraken-reads.sh
 ~~~
-{: .bash}
+{: .language-bash}
 
 
 ~~~
@@ -195,7 +195,7 @@ So, in my case I am going to run it with the following command:
 ~~~
 $ sh kraken-reads.sh metadata/SraRunTable.txt /mnt/d/programs/kraken/database/database/datab03242022
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 working in run SRR12778013
@@ -223,7 +223,7 @@ By the end of the process, we will have a new set of content inside the `taxonom
 ~~~
 $ tree -L 2
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 .
@@ -281,7 +281,7 @@ Now, we can do this same process with each of the `capsicum` folders. Inside `mi
 ~~~
 $ sh kraken-reads.sh metadata/SraRunTable.txt /mnt/d/programs/kraken/database/database/datab03242022
 ~~~
-{: .bash}
+{: .language-bash}
 
 If we expore what we obtained, we will see the results are 
 there:
@@ -289,7 +289,7 @@ there:
 ~~~
 $ for i in miscelaneous-capsicum newberry-2020; do echo -e "\n"; tree $i -L 3; done
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 miscelaneous-capsicum
