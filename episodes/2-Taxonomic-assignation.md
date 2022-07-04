@@ -181,7 +181,7 @@ cat metadata/run-labels.txt | while read line; do file1=$(echo $runs/$line-1.fas
 echo '#!/bin/sh''\n''\n'"kraken2 --db $kdat --threads 6 --paired" "$runs/$line"'-1.fastq' "$runs/$line"'-2.fastq' "--output taxonomy/kraken/krakens/$line.kraken --report taxonomy/kraken/reports/$line.report" > taxonomy/taxonomy-logs/scripts/$line-kraken.sh; sh taxonomy/taxonomy-logs/scripts/$line-kraken.sh; done
 
 ~~~
-{: .output}
+{: .language-bash}
 
 As it says in the first lines, now you will need to provide it with 1) the location of your `SraRunTable.txt` file, and 2) the location of your `kraken2` database. This program will create in your actual directory the folders where the outputs are going to be allocated and little pieces of code in the `taxonomy-logs/scripts` folder that were used to run `kraken2` on each 
 pair of reads.
