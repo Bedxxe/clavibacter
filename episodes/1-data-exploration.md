@@ -69,7 +69,7 @@ I have created a folder structure inside `clavibacter` main folder as follows:
 ~~~
 $ tree
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 .
@@ -88,7 +88,7 @@ Inside the `capsicum` folder, I have created the next folder organization:
 ~~~
 $ tree -L 1
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 .
@@ -118,7 +118,7 @@ $ mkdir reads/
 $ mv *.fastq reads/
 $ ls reads/*.fastq | wc -l
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 24
@@ -133,7 +133,7 @@ Let's see the structure of the file:
 ~~~
 $ head -n 5 metadata/SraRunTable.txt
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 Run,Assay Type,AvgSpotLen,Bases,BioProject,BioSample,BioSampleModel,Bytes,Center Name,Collection_date,Consent,DATASTORE filetype,DATASTORE provider,DATASTORE region,Experiment,geo_loc_name_country,geo_loc_name_country_continent,geo_loc_name,HOST,Instrument,Isolation_Source,Lat_Lon,Library Name,LibraryLayout,LibrarySelection,LibrarySource,Organism,Platform,ReleaseDate,replicate,Sample Name,SRA Study
@@ -150,7 +150,7 @@ which is the information inside the `Run` column, the same name that each forwar
 ~~~
 $ cat metadata/SraRunTable.txt| sed -n '1!p' | while read line; do read=$(echo $line | cut -d',' -f1); echo $read;done
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 SRR12778013
@@ -181,7 +181,7 @@ inside the [scripts-folder](https://github.com/Bedxxe/clavibacter/tree/main/scri
 ~~~
 $ cat down-reads.sh
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 #!/bin/sh
