@@ -5,10 +5,11 @@ title: "First exploration of the data "
 
 # First exploration of the data
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
-## First steps on exploring the data
+
 
 <img src="/clavibacter/figures/bw-hokusai.jpg" alt="Black and white representation of a wave made by Hokusai." >
-### Introductions
+
+## Introductions
 
 I was invited to participate in a project to uncover the presence of a group of bacterial lineajes from the genus 
 _Clavibacter_ in different cultivars. As planned by my Sensei (Professor Nelly Selem-Mojica), we will use 
@@ -224,3 +225,5 @@ experience, the presence of a `_` in the names can cause issues with some progra
 files. The last line is to create a file where we can locate the name of each 
 library. This information will be located inside the `run-labels.txt` file.
 
+
+<img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
