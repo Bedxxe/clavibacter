@@ -217,7 +217,7 @@ ls $runs | while read line ; do new=$(echo $line | sed 's/_/-/g'); mv $runs/$lin
 cat $metd  | sed -n '1!p' | while read line; do read=$(echo $line | cut -d',' -f1); echo $read ; done > run-labels.txt
 mv run-labels.txt metadata/
 ~~~
-{: .output}
+{: .language-bash}
 
 
 I will like to write about some of the steps of this program. According to my 
