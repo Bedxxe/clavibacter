@@ -30,3 +30,8 @@ https://bedxxe.github.io/clavibacter/episodes/7-16S-Taxonomic-exploration-R.html
 
 ![changuito-tavehua](https://user-images.githubusercontent.com/67386612/166823738-87a8da81-11d4-4dcb-88f9-06206c5bd824.png)
 
+
+
+
+![grecas-mitla1](https://user-images.githubusercontent.com/67386612/177206200-34922b72-228a-43cc-9ecf-4a0ffab66036.png)
+
