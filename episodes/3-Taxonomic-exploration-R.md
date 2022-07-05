@@ -12,7 +12,7 @@ title: "Taxonomic exploration with R"
 ## Correction of kraken2 report output
 
 In the last chapter, we processed all the data from _Capsicum_. I processed all the 
-_Lycopersicum_ libraries as well in order to have two sets of data from two 
+_Tuberosum_ libraries as well in order to have two sets of data from two 
 different host-plants to compare. First, I want to repeat that we are interested 
 in the different populations of _Clavibacter_ species that are present in the 
 holobiont (plant). If we take a look in how `kraken2` assignated the names of the 
@@ -224,9 +224,331 @@ kraken-biom taxonomy/kraken/reports/* --fmt json -o taxonomy/biom-files/$aut.bio
 Now, we will obtain the `biom-file` for all the author's libraries in the next 
 time we run the script for the other host plants.
 
+**Note that in order to use the `kraken-biom` program, one needs ot install it. I install it in a conda environment**
+
 ## Using R for the analysis
 
 ### Loading the packages 
+
+We will use a big set of packages for the analysis of the data. The main one 
+is [`phyloseq`](https://joey711.github.io/phyloseq/). We will load inside our 
+R environmnet the next set of packages:
+
+~~~
+> library("phyloseq")
+> library("ggplot2")
+> library("edgeR")
+> library("DESeq2")
+> library("RColorBrewer")
+> library("stringr")
+> library("sf")
+> library("rnaturalearth")
+> library("rnaturalearthdata")
+> library("ggspatial")
+> library("ggrepel")
+> library("grid")
+> library("gridExtra")
+> library("ggmap")
+> library("cowplot")
+> library("ggsn")
+> library("scatterpie")
+~~~
+{: .language-r}
+
+Remember that some warnings can appear in the `Console` but do not be afraid. This 
+warnings are not errors that will preclude our management of the data.
+
+### Creating reliable palettes of colors
+
+Since we will be managing different OTUs and we want to contrast the abundance of 
+each ones, we will create two color palettes that will help us to have a diverse 
+set of colors, all of them contrasting between each other. 
+
+The first one we will call it `manual.colors`
+~~~
+> manual.colors <- c('black','forestgreen', 'red2', 'orange', 'cornflowerblue', 
+                 'magenta', 'darkolivegreen4', 'indianred1', 'tan4', 'darkblue', 
+                 'mediumorchid1','firebrick4',  'yellowgreen', 'lightsalmon', 'tan3',
+                 "tan1", 'wheat4', '#DDAD4B', 'chartreuse', 
+                 'seagreen1', 'moccasin', 'mediumvioletred', 'seagreen','cadetblue1',
+                 "darkolivegreen1" ,"tan2" ,   "tomato3" , "#7CE3D8")
+~~~
+{: .language-r}
+
+A second one, that will be useful for othe categorizations will be named 
+`diverse.colors`:
+~~~
+diverse.colors <- c("#1b9e77","#d95f02","#7570b3","#e7298a",
+                    "#66a61e","#e6ab02","#a6761d","#666666")
+~~~
+{: .language-r}
+
+### Loading the biom files
+
+We will load all the obtained biom files for the four folders, 3 from _Capsicum_, 
+and 1 from _Tuberosum_:
+
+~~~
+> #Capsicum
+> c.choi <- import_biom("../capsicum/choi-2020/taxonomy/biom-files/choi-2020.biom")
+> c.misce <- import_biom("../capsicum/miscelaneous-capsicum/taxonomy/biom-files/miscelaneous-capsicum.biom")
+> c.new <- import_biom("../capsicum/newberry-2020/taxonomy/biom-files/newberry-2020.biom")
+
+#Tuberosum
+> t.shi <- import_biom("../tuberosum/shi-2019/taxonomy/biom-files/shi-2019.biom")
+~~~
+{: .language-r}
+
+We now have 4 new objects, each of them is a `phyloseq` object that has the 
+information of all the samples (libraries) of each author:
+~~~
+> c.choi
+~~~
+{: .language-r}
+
+~~~
+phyloseq-class experiment-level object
+otu_table()   OTU Table:         [ 13193 taxa and 12 samples ]
+sample_data() Sample Data:       [ 12 samples by 8 sample variables ]
+tax_table()   Taxonomy Table:    [ 13193 taxa by 7 taxonomic ranks ]
+~~~
+{: .output}
+
+### Adjusting the biom data
+
+We will use the next lines to trim the `tax_table` of each of the `phyloseq` 
+objects. We need to change the name of the columns to be meaningul, trim each of the names of the OTUs, and trim the names of the sample since the 
+`kraken-biom.sh` added a "t-" before each name:
+
+~~~
+> #Capsicum
+> c.choi@tax_table@.Data <- substring(c.choi@tax_table@.Data, 4)
+> colnames(c.choi@tax_table@.Data) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+> colnames(c.choi@otu_table@.Data) <- substring(colnames(c.choi@otu_table@.Data), 3)
+
+> c.misce@tax_table@.Data <- substring(c.misce@tax_table@.Data, 4)
+> colnames(c.misce@tax_table@.Data) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+> colnames(c.misce@otu_table@.Data) <- substring(colnames(c.misce@otu_table@.Data), 3)
+
+> c.new@tax_table@.Data <- substring(c.new@tax_table@.Data, 4)
+colnames(c.new@tax_table@.Data) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+> colnames(c.new@otu_table@.Data) <- substring(colnames(c.new@otu_table@.Data), 3)
+
+> #Tuberosum
+> t.shi@tax_table@.Data <- substring(t.shi@tax_table@.Data, 4)
+colnames(t.shi@tax_table@.Data) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+> colnames(t.shi@otu_table@.Data) <- substring(colnames(t.shi@otu_table@.Data), 3)
+~~~
+{: .language-r}
+
+### Loading and trimming the metadata
+
+We already have the metadata of each set of data inside the `metadata/` folder 
+in the `SraRunTable.txt`. We will use the next set of commands to load this 
+information to RStudio. **Please note that I am leaving out one library 
+from the Capsucum/Newberry-2020 data (SRR10527395) and two libraries from 
+Tuberosum/Newberry-2020 (SRR7448326,SRR7457712) because the reads are in a 
+incompatibl format**:
+
+~~~
+> #Capsicum
+> ##Metadata from Capsicum/Choi-2020
+> mraw.choi <- read.csv2(file = "../capsicum/choi-2020/metadata/SraRunTable.txt", sep = ",")
+> ##Metadata from Capsicum/Miscelaneous 
+mraw.misce <- read.csv2(file = "../capsicum/miscelaneous-capsicum/metadata/SraRunTable.txt", sep = ",")
+> ##Metadata from Capsicum/Newberry-2020
+> mraw.new <- read.csv2(file = "../capsicum/newberry-2020/metadata/SraRunTable.txt", sep = ",")
+> mraw.new <- mraw.new[! mraw.new$Run %in% c("SRR10527395"),]
+
+> #Tuberosum
+> ##Metadata from Tuberosum/Newberry-2020
+> mraw.shi <- read.csv2(file = "../tuberosum/shi-2019/metadata/SraRunTable.txt", sep = ",")
+> mraw.shi <- mraw.shi[! mraw.shi$Run %in% c("SRR7448326","SRR7457712"),]
+
+~~~
+{: .language-r}
+
+But if we explore the metadata, we will see that there is a lot of information. 
+Some of that information we do not need it and some need to be trimmed to use 
+it. We will stablish the same structure for each metadata. This will include 
+the next fields (Columns in the data.frame):
+
+* Sample: Name of the sample. 
+* Plant: The host-plant of the sample
+* Environment: Environmental circunstances where the plant was sampled 
+* Isolation: Part of the plant where the microbiome was sampled
+* State: Disease or Healthy, I will use the letters D and H.
+* Latitude: Coordinates where the sample was taken.
+* Longitude: Coordinates where the sample was taken.
+
+
+~~~
+> ## Trimming the metadata
+> #Capsicum
+> met.choi <- data.frame(row.names = mraw.choi$Run, 
+                       Plant = rep("Capsicum", times = 12),
+                       Sample= mraw.choi$Run, 
+                       Environment = rep("Field", times = 12),
+                       Isolation= c(rep("Stem",4),rep("Root",4),rep("Stem",2),rep("Root",2)) ,
+                       State= c("D","H","H","H","D","D","D","H","D","D","H","H"),
+                       Latitude = rep(x = 25.811389, times = 12),
+                       Longitude = rep(x= 106.523333, times = 12 ))
+> met.misce <- data.frame(row.names = mraw.misce$Run, 
+                        Plant = rep("Capsicum", times = 4),
+                        Sample = mraw.misce$Run,
+                        Environment = c("Field","Field","Greenhouse","Field"),
+                        Isolation = c(rep("Na", times = 4)),
+                        State = c(rep("Na", times = 4)),
+                        Latitude = c(rep("37.470000", times = 3),mraw.misce$geographic_location_.latitude.[4]),
+                        Longitude = c(rep("127.970000", times = 3),mraw.misce$geographic_location_.longitude.[4]))
+> met.new <- data.frame(row.names = mraw.new$Run, 
+                      Plant = rep("Capsicum", times = 3),
+                      Sample = mraw.new$Run,
+                      Environment = mraw.new$env_local_scale,
+                      Isolation = mraw.new$env_medium,
+                      State = rep("Na", times = length(mraw.new$Run)),
+                      Latitude = c("32.601389","32.601389","33.20654") ,
+                      Longitude = c("85.353611","85.353611","87.534607"))
+
+> #Tuberosum
+> met.shi <- data.frame(row.names = mraw.shi$Run, 
+                      Plant = rep("Tuberosum", times = 18), 
+                      Sample = mraw.shi$Run,
+                      Environment = rep("Field", times = 18),
+                      Isolation = rep("Soil", times = 18),
+                      State = rep("D", times = 18),
+                      Latitude = rep("34.2487", times = 18), 
+                      Longitude = rep("119.8167", times = 18))
+
+
+~~~
+{: .language-r}
+
+### Merging the information into new objects
+
+First, we need to add the metadata of each set of samples to its corresponding 
+`phyloseq` object:
+
+~~~
+> #Capsicum
+> c.choi <- merge_phyloseq(c.choi, sample_data(met.choi))
+> c.misce <- merge_phyloseq(c.misce,sample_data(met.misce))
+> c.new <- merge_phyloseq(c.new,sample_data(met.new))
+> ##Merging all the three individual object in one that contains all the Capsicum data
+> capsi <- merge_phyloseq(c.choi, c.misce, c.new)
+
+> #Tuberosum
+> tuber <- merge_phyloseq(t.shi, sample_data(met.shi))
+~~~
+{: .language-r}
+
+Next, we will put all this together into the `cbact` phyloseq object, and all the 
+metadata into the `all.meta` object:
+
+~~~
+> ##Merging all 4 complete objects in one
+> cbact <- merge_phyloseq(capsi,tuber)
+> ##Concentrating the metadata in one object
+> all.meta<- rbind(met.choi, met.misce, met.new, met.shi)
+> cbact
+~~~
+{: .language-r}
+
+~~~
+phyloseq-class experiment-level object
+otu_table()   OTU Table:         [ 14195 taxa and 37 samples ]
+sample_data() Sample Data:       [ 37 samples by 8 sample variables ]
+tax_table()   Taxonomy Table:    [ 14195 taxa by 7 taxonomic ranks ]
+~~~
+{: .output}
+
+## Normalization of the data
+
+If we explore the depth of the different data that we have, we will see that is 
+different between every sample. Since we will begin to plot the data, we will 
+define the a vector containing the colors assigned to each plant, thus we will have 
+a constant color pattern for the plant factor in each of the plots:
+
+~~~
+# We will create a vector to allocate the colors for each of the host plants that we have
+plant.colors <- diverse.colors[1:length(unique(all.meta$Plant))]
+names(plant.colors) <- unique(all.meta$Plant)
+~~~
+{: .language-r}
+
+We also are going to create a folder to locate the figures we will be generating:
+~~~
+> dir.create("figures")
+~~~
+{: .language-r}
+
+Now, we can create a figure to see the difference in the depth of the data:
+
+~~~
+> #Allocating the taxonomic information into a data.frame
+> dprof <- data.frame(Samples = colnames(cbact@otu_table@.Data),
+                    Reads = sample_sums(cbact),
+                    Plant = cbact@sam_data@.Data[[2]])
+> #Plotting the obtained data
+> ggplot(data = dprof, mapping = aes(x = Samples, y = Reads))+
+  geom_bar(stat = "identity", aes( fill = Plant)) +
+  scale_fill_manual(values = c("cyan3","#EBA937"))+
+  theme(text = element_text(size = 25),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/sampleDepth-03-01.png">
+
+
+The cyan line marks the mean of the samples depth.
+
+This makes is clear that the data needs normalization. McMurdi _et al._ found a 
+great methodology to normalize the data. In their paper [Waste Not, Want Not: Why Rarefying Microbiome Data Is Inadmissible](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003531) they make an interesting discusion 
+regarding this constant issue in this type of analysis. We will use their 
+methodology:
+
+~~~
+> #-- Defining the normalization method --#
+> edgeRnorm = function(physeq, ...) {
+  require("edgeR")
+  require("phyloseq")
+  # physeq = simlist[['55000_1e-04']] z0 = simlisttmm[['55000_1e-04']] physeq
+  # = simlist[['1000_0.2']] z0 = simlisttmm[['1000_0.2']] Enforce orientation.
+  if (!taxa_are_rows(physeq)) {
+    physeq <- t(physeq)
+  }
+  x = as(otu_table(physeq), "matrix")
+  # See if adding a single observation, 1, everywhere (so not zeros) prevents
+  # errors without needing to borrow and modify calcNormFactors (and its
+  # dependent functions) It did. This fixed all problems.  Can the 1 be
+  # reduced to something smaller and still work?
+  x = x + 1
+  # Now turn into a DGEList
+  y = edgeR::DGEList(counts = x, remove.zeros = TRUE)
+  # Perform edgeR-encoded normalization, using the specified method (...)
+  z = edgeR::calcNormFactors(y, ...)
+  # A check that we didn't divide by zero inside `calcNormFactors`
+  if (!all(is.finite(z$samples$norm.factors))) {
+    stop("Something wrong with edgeR::calcNormFactors on this data, non-finite $norm.factors")
+  }
+  # Don't need the following additional steps, which are also built-in to some
+  # of the downstream distance methods. z1 = estimateCommonDisp(z) z2 =
+  # estimateTagwiseDisp(z1)
+  return(z)
+}
+> z<- edgeRnorm(cbact, method = "TMM")
+> #-- Merging all the objects in the new normalized phyloseq object --#
+> nor.cb <- merge_phyloseq(otu_table(z@.Data[[1]], taxa_are_rows = TRUE),
+                         tax_table(cbact@tax_table@.Data),
+                         cbact@sam_data)
+> #Removing the dispensable created object
+> rm(z)
+~~~
+{: .language-r}
+
+### Obtaining the Clavibacter data only
 
 
 ~~~
@@ -234,8 +556,25 @@ time we run the script for the other host plants.
 ~~~
 {: .language-r}
 
+~~~
 
+~~~
+{: .language-r}
 
+~~~
+
+~~~
+{: .language-r}
+
+~~~
+
+~~~
+{: .language-r}
+
+~~~
+
+~~~
+{: .language-r}
 
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
