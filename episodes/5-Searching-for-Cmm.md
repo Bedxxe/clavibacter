@@ -1,10 +1,15 @@
-# Clavibacter
+---
+source: md
+title: "Searching for Cmm"
+---
+
+
+# Searching for _Clavibacter michiganensis_ michiganensis (Cmm) specific sequences
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
 
-## Searching for _Clavibacter michiganensis_ michiganensis (Cmm) specific genes
 
-<img src="/clavibacter/figures/shimomeguro.jpg" >
+<img src="/clavibacter/figures/the-fields-of-sekiya-by-the-sumida-river.jpg" >
 
 After extracting the specific _Clavibacter michiganensis_ michiganensis (Cmm) reads 
 from all the libraries, I need to evaluate if these sequences are truly from 
@@ -39,7 +44,7 @@ reference Cmm genome has this headers:
 ~~~
 $ grep '>' cmm-contigs.fa
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 >NC_009480.1
@@ -55,7 +60,7 @@ It is important to highlight that all the headers are going to be the same.
 ~~~
 $ cat changing-headers.sh
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 #!/bin/sh
@@ -83,7 +88,7 @@ cat heads.txt | while read line; do sed "s/$line/>$sufx/" $sufx.fna > temp.txt; 
 #REMOVING TEMP FILES
 rm heads.txt
 ~~~
-{: .output}
+{: .language-bash}
 
 I will run it in a new directory called `trim-c-genomes`:
 
@@ -92,7 +97,7 @@ $ mkdir trim-c-genomes
 $ sh changing-headers.sh ../cmm/cmm-contigs.fa Cmm
 $ grep '>' Cmm.fna
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 >Cmm
@@ -107,7 +112,7 @@ downloaded previously:
 ~~~
 $ ls clavi-genomes/
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 Clavibacter_michiganensis_subsp_capsici_1101.fna
@@ -148,7 +153,7 @@ $ cd trim-c-genomes
 $ ls clavi-genomes/*.fna | while read line; do name=$(echo $line | cut -d'/' -f2 |cut -d'_' -f4,5,6| cut -d'.' -f1); sh changing-headers.sh $line $name; done
 $ ls
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 capsici_1101.fna           insidiosus_R1-1.fna         nebraskensis_DOAB_397.fna
@@ -181,7 +186,7 @@ this genomes in one big file and then I will run the code to do the database:
 $  cat trim-c-genomes/* outgroups/* > all-genomes.fasta
 $  makeblastdb -in ../reference/all-genomes.fasta -dbtype nucl -out all-clavi-g/all-genomes
 ~~~
-{: .bash}
+{: .language-bash}
 
 
 ~~~
@@ -192,7 +197,7 @@ $  makeblastdb -in ../reference/all-genomes.fasta -dbtype nucl -out all-clavi-g/
 ~~~
 
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 
@@ -202,7 +207,7 @@ $  makeblastdb -in ../reference/all-genomes.fasta -dbtype nucl -out all-clavi-g/
 ~~~
 $ makeblastdb -in ../reference/cmm/cmm.fna -dbtype nucl -out cmm/ndatabase/cmm
 ~~~
-{: .bash}
+{: .language-bash}
 
 
 ~~~
@@ -222,20 +227,23 @@ Adding sequences from FASTA; added 3053 sequences in 0.0727699 seconds.
 cat
 cat headers.txt | while read line; do sed "s/$line/>Cmm/" cmm-contigs.fa > temp.txt; mv temp.txt cmm-contigs.fa ;done
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 $ bwa mem index/cmm-contigs.fa ../../../blast/cmm/shotg-seq/clavi-SRR13319511-1.fq ../../../blast/cmm/shotg-seq/clavi-SRR13319511-2.fq -o clavi-SRR13319511.sam
 ~~~
-{: .bash}
+{: .language-bash}
 
 To delete zero-blast results
 ~~~
 ls -l output-blast/0.000001/ |  grep " 0 May 27" | while read line; do file=$(echo $line | cut -d' ' -f9); rm output-blast/0.000001/$file; done
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 
 ~~~
-{: .bash}
+{: .language-bash}
+
+
+<img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
