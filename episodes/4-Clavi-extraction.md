@@ -326,18 +326,18 @@ $ ls reads/cmm/
 {: .language-bash}
 
 ~~~
-cmm-capsi-choi-2020-SRR12778013-1.fq  cmm-capsi-choi-2020-SRR12778019-1.fq
-cmm-capsi-choi-2020-SRR12778013-2.fq  cmm-capsi-choi-2020-SRR12778019-2.fq
-cmm-capsi-choi-2020-SRR12778014-1.fq  cmm-capsi-choi-2020-SRR12778020-1.fq
-cmm-capsi-choi-2020-SRR12778014-2.fq  cmm-capsi-choi-2020-SRR12778020-2.fq
-cmm-capsi-choi-2020-SRR12778015-1.fq  cmm-capsi-choi-2020-SRR12778021-1.fq
-cmm-capsi-choi-2020-SRR12778015-2.fq  cmm-capsi-choi-2020-SRR12778021-2.fq
-cmm-capsi-choi-2020-SRR12778016-1.fq  cmm-capsi-choi-2020-SRR12778022-1.fq
-cmm-capsi-choi-2020-SRR12778016-2.fq  cmm-capsi-choi-2020-SRR12778022-2.fq
-cmm-capsi-choi-2020-SRR12778017-1.fq  cmm-capsi-choi-2020-SRR12778023-1.fq
-cmm-capsi-choi-2020-SRR12778017-2.fq  cmm-capsi-choi-2020-SRR12778023-2.fq
-cmm-capsi-choi-2020-SRR12778018-1.fq  cmm-capsi-choi-2020-SRR12778024-1.fq
-cmm-capsi-choi-2020-SRR12778018-2.fq  cmm-capsi-choi-2020-SRR12778024-2.fq
+cmm-capsi-choi-2020-SRR12778013-1.fasta  cmm-capsi-choi-2020-SRR12778019-1.fasta
+cmm-capsi-choi-2020-SRR12778013-2.fasta  cmm-capsi-choi-2020-SRR12778019-2.fasta
+cmm-capsi-choi-2020-SRR12778014-1.fasta  cmm-capsi-choi-2020-SRR12778020-1.fasta
+cmm-capsi-choi-2020-SRR12778014-2.fasta  cmm-capsi-choi-2020-SRR12778020-2.fasta
+cmm-capsi-choi-2020-SRR12778015-1.fasta  cmm-capsi-choi-2020-SRR12778021-1.fasta
+cmm-capsi-choi-2020-SRR12778015-2.fasta  cmm-capsi-choi-2020-SRR12778021-2.fasta
+cmm-capsi-choi-2020-SRR12778016-1.fasta  cmm-capsi-choi-2020-SRR12778022-1.fasta
+cmm-capsi-choi-2020-SRR12778016-2.fasta  cmm-capsi-choi-2020-SRR12778022-2.fasta
+cmm-capsi-choi-2020-SRR12778017-1.fasta  cmm-capsi-choi-2020-SRR12778023-1.fasta
+cmm-capsi-choi-2020-SRR12778017-2.fasta  cmm-capsi-choi-2020-SRR12778023-2.fasta
+cmm-capsi-choi-2020-SRR12778018-1.fasta  cmm-capsi-choi-2020-SRR12778024-1.fasta
+cmm-capsi-choi-2020-SRR12778018-2.fasta  cmm-capsi-choi-2020-SRR12778024-2.fasta
 ~~~
 {: .output}
 
