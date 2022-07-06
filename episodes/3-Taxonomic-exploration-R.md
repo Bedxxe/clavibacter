@@ -499,7 +499,7 @@ Now, we can create a figure to see the difference in the depth of the data:
 ~~~
 {: .language-r}
 
-<img src="/clavibacter/figures/sampleDepth-03-01.png">
+<img src="/clavibacter/figures/03-01-sampleDepth.png">
 
 
 The cyan line marks the mean of the samples depth.
@@ -550,31 +550,328 @@ methodology:
 
 ### Obtaining the Clavibacter data only
 
+Since the scope of this work is to find the diversity of the _Clavibacter_ 
+lineajes, we will extract this information from the data and put it in a new 
+object call `clabac`
 
 ~~~
+> clabac <- subset_taxa(nor.cb, Genus == "Clavibacter")
+> clavi.df <- psmelt(clabac)
+> clavi.df$Species[clavi.df$Species==""] <- "sp."
+~~~
+{: .language-r}
+
+We will transform the abundance this to relative abundance to compare all the 
+libraries between each other and plot the data:
+
+~~~
+# Transformation to relative abundance
+clavi.df$ClaRelative <- sample_sums(clabac)/sample_sums(cbact)
+#Plotting this data
+ggplot(data = clavi.df, mapping = aes(y= ClaRelative, x = Sample, fill = Species, color = Plant))+
+  geom_bar(position = "stack", stat = "identity", size=1.5)+
+  scale_color_manual(values = plant.colors)+
+  ylab(label = "Clavibacter-RelAbundance")+
+  theme(text = element_text(size= 25),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 ~~~
 {: .language-r}
 
-~~~
+<img src="/clavibacter/figures/03-02-claviAbundance.png">
+
+Now we will see what about the beta-diversity of this clavibacter data. First, we 
+will ordinate de data with `phyloseq` functions and we will plot it:
 
 ~~~
-{: .language-r}
-
-~~~
-
-~~~
-{: .language-r}
-
-~~~
-
+> clav.ord <- ordinate(physeq = clabac, method = "NMDS", distance = "bray")
 ~~~
 {: .language-r}
 
 ~~~
-
+> plot_ordination(physeq = clabac, ordination = clav.ord,
+                color = "Plant") +
+  stat_ellipse(geom = "polygon", alpha = 0.2, aes(fill = Plant))+
+  geom_point(size=4 , alpha = 0.5)+
+  scale_fill_manual(values = plant.colors)+
+  scale_color_manual(values = plant.colors)
 ~~~
 {: .language-r}
 
+<img src="/clavibacter/figures/03-03-claviBeta.png">
+
+
+### Preparing the data for plotting
+
+Before we began, we need to coerce the `Latitude` and `Longitude` data from 
+characters to numeric data
+
+~~~
+> ## Coercing the coordinates to numeric
+> all.meta$Latitude <- as.numeric(all.meta$Latitude)
+> all.meta$Longitude <- as.numeric(all.meta$Longitude)
+> # Also for clavi.df
+> clavi.df$Latitude <- as.numeric(clavi.df$Latitude)
+> clavi.df$Longitude <- as.numeric(clavi.df$Longitude)
+~~~
+{: .language-r}
+
+We will create a new data.frame where we will locate the amplitude in coordinates 
+that we need to plot the data. This will be the maximum and minimum value of all 
+the sample's `Longitude` and `Latitude` plus 2 and 1 respectively:
+
+~~~
+> ## Extracting the max and min value for all samples with a margin to allow the visualization of the data
+> samp.sites <- data.frame(longitude= c(min(all.meta$Longitude)-2,max(all.meta$Longitude)+2),
+                         latitude = c(min(all.meta$Latitude)-1,max(all.meta$Latitude)+1))
+~~~
+{: .language-r}
+
+We will do a `list` where we will put all the information from just one sample in 
+each of its subsection. This subsection will have a new column to allocate the 
+Genus and Species information together:
+
+~~~
+> a <- list() # An empty list
+> b <- NULL # An empty vector to locate the different Genus+Species diversity
+> for (i in 1:length(unique(clavi.df$Sample))) {
+    #Obtaining the data to work with inside a list
+    a[[i]] <- clavi.df[clavi.df$Sample==unique(clavi.df$Sample)[i],]
+    # Pasting the name of the Genus and Species in one new column
+    a[[i]]$OTUName <- paste(a[[i]]$Genus, a[[i]]$Species, sep = "-")
+    # We will define a vector to allocate all the different OTUs in case that not all the samples have the same ones
+    b <- c(b,unique(a[[i]]$OTUName))
+> }
+> rm(i)
+~~~
+{: .language-r}
+
+We will also stablis a vector to link each OTU name with a color from our 
+`manual.colors` vector:
+
+~~~
+> #We will take colors from the manual.colors vector as many unique OTUs in our data
+> samp.colors <- rev(manual.colors)[1:(length(unique(b)))]
+> # We will name this colors with the names of the unique OTUs
+> names(samp.colors) <- unique(b)
+~~~
+{: .language-r}
+
+We will use the [scatterpie](https://cran.r-project.org/web/packages/scatterpie/vignettes/scatterpie.html) package to plot pie-graphs in the map. To accomplish 
+this, we need a data frame that contains:
+
+* Sample name
+* Longitude
+* Latitude
+* Host plant
+
+And a new column for each OTU present in all the samples that we want to graph, in 
+this case, we need 13 columns.
+
+Let's get the Sample name  Longitude,Latitude, and plant-hots information
+
+~~~
+> scatter.samples <- unique(clavi.df$Sample)
+> scatter.Longitude <- NULL
+> scatter.Latitude <- NULL
+> scatter.Plant <- NULL
+> for (i in 1:length(unique(clavi.df$Sample))) {
+    scatter.Longitude[i] <- a[[i]]$Longitude[1]
+    scatter.Latitude[i] <- a[[i]]$Latitude[1]
+    scatter.Plant[i] <- a[[i]]$Plant[1]
+> }
+> rm(i)
+> #Let's put the 4 vector into a data.frame
+> scatter.data <- data.frame(scatter.samples, scatter.Longitude,scatter.Latitude, scatter.Plant)
+> colnames(scatter.data) <- c("Sample","Longitude","Latitude","Plant")
+~~~
+{: .language-r}
+
+Then, we need to put all the abundances of the different OTUs in a new data.frame
+
+~~~
+> # I will create an empty data.frame
+> OTU.scatter <- data.frame(matrix(ncol = length(unique(b)), 
+                                   nrow = length(unique(clavi.df$Sample))))
+> colnames(OTU.scatter) <- unique(b)
+~~~
+{: .language-r}
+
+And fill this data.frame with the abundance information:
+
+~~~
+> for (i in 1:length(unique(b))) {
+    O.Name <- NULL #Vector to put the abundance information of each OTU
+    for (j in 1:length(unique(clavi.df$Sample))) {
+      O.Name <- c(O.Name,a[[j]]$ClaRelative[a[[j]]$OTUName==unique(b)[i]])
+    }
+    OTU.scatter[i] <- O.Name #Filling each column
+> }
+> rm(i,j,O.Name,scatter.samples,
+     scatter.Plant,scatter.Longitude,scatter.Latitude)
+~~~
+{: .language-r}
+
+Finally, we will bind the two data.frames:
+
+~~~
+> scatter.data <- cbind(scatter.data,OTU.scatter)
+> rm(OTU.scatter)
+~~~
+{: .language-r}
+
+### Plotting the data on a map and pie-graphs
+
+We have all the information we need to generate the plots. First, we will create 
+individual pie-graphs.
+
+As an example, we will plot the first sample on our "a" list
+
+~~~
+> ggplot(data = a[[1]], mapping = aes(x = Sample, y = ClaRelative, fill= OTUName, color = Plant))+
+    geom_bar(stat = "identity", width = 1, size= 1.5) +
+    theme_bw()+
+    scale_fill_manual(values = samp.colors) +
+    scale_color_manual(values = plant.colors) +
+    coord_polar("y", start=0)+
+    ggtitle(paste(unique(a[[1]]$Plant),unique(a[[1]]$Sample), sep = " "))+
+    theme(plot.title = element_text(size = 30),
+          axis.line = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.title.x = element_blank(), 
+          axis.title.y = element_blank(),
+          axis.ticks=element_blank(),
+          panel.background=element_blank(),
+          panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          plot.background=element_blank())
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/03-04-a1Sample.png">
+
+We will get this plots for all the samples and save them inside a new set of directories
+
+~~~
+> # Creating the folders that will contain the plots
+> dir.create("pies/")
+> dir.create("pies/labeled/")
+> dir.create("pies/just-pie")
+~~~
+{: .language-r}
+
+First, we will create the labeled pie graphs with the next `for` cycle and save 
+them inside the `pies/labeled/` directory:
+~~~
+> l.pies <- list()
+> for (i in 1:length(unique(clavi.df$Sample))) {
+    l.pies[[i]] <- ggplot(data = a[[i]], mapping = aes(x = Sample, y = Abundance, fill= OTUName,color = Plant))+
+      geom_bar(stat = "identity", width = 1,size= 0.6) +
+      theme_bw()+
+      scale_fill_manual(values = samp.colors) +
+      scale_color_manual(values = plant.colors) +
+      coord_polar("y", start=0)+
+      ggtitle(paste(unique(a[[i]]$Plant),unique(a[[i]]$Sample), sep = " "))+
+      theme(plot.title = element_text(size = 20),
+            axis.line = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.title.x = element_blank(), 
+            axis.title.y = element_blank(),
+            axis.ticks=element_blank(),
+            panel.background=element_blank(),
+            panel.border=element_blank(),
+            panel.grid.major=element_blank(),
+            panel.grid.minor=element_blank(),
+            plot.background=element_blank())
+    ggsave(filename = paste(unique(clavi.df$Sample)[i],"png",sep = "."),dpi = 600, 
+           path = "pies/labeled/", width = 30, height = 20, units = "cm")
+> }
+> rm(i)
+~~~
+{: .language-r}
+
+Now, we can do the ones without labels. Making them useful for diverse purposes:
+
+~~~
+> n.pies <- list()
+> for (i in 1:length(unique(clavi.df$Sample))) {
+    n.pies[[i]] <- ggplot(data = a[[i]], mapping = aes(x = Sample, y = Abundance, fill= OTUName,color = Plant))+
+      geom_bar(stat = "identity", width = 1,size= 0.6) +
+      theme_bw()+
+      scale_fill_manual(values = samp.colors) +
+      scale_color_manual(values = plant.colors) +
+      coord_polar("y", start=0)+
+      theme(axis.line = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.title.x = element_blank(), 
+            axis.title.y = element_blank(),
+            axis.ticks=element_blank(),
+            panel.background=element_blank(),
+            panel.border=element_blank(),
+            panel.grid.major=element_blank(),
+            panel.grid.minor=element_blank(),
+            plot.background=element_blank(),
+            legend.position="none")
+    ggsave(filename = paste(unique(clavi.df$Sample)[i],"png",sep = "."),dpi = 600, 
+           path = "pies/just-pie/", width = 20, height = 20, units = "cm")
+> }
+> rm(i)
+~~~
+{: .language-r}
+
+Let's put this pie-graphs over the map.
+We will use the `map_data` function to load the information we need.
+
+~~~
+> mi.world <- map_data(map = "world")
+~~~
+{: .language-r}
+
+Then we will use the geom_polygon function from ggplot2 to plot the map. We will 
+use the `coord_fixed` option to delimit the map to the coordinate range from the 
+samples:
+
+~~~
+> ggplot(mi.world, mapping = aes(x = long, y = lat, group = group))+
+    geom_polygon(fill= "gray",colour = "black")+
+    xlab("Longitude") + ylab("Latitude") + theme_bw()+ 
+    coord_fixed(xlim = samp.sites$longitude,
+                ylim = samp.sites$latitude,
+                expand = TRUE)
+> ggsave(filename = paste("03-05-nakedMap","png",sep = "."),dpi = 900, 
+         path = "figures/", width = 30, height = 20, units = "cm")
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/03-05-nakedMap.png">
+
+Finally, we will use the `geom_scatterpie` from the [scatterpie](https://cran.r-project.org/web/packages/scatterpie/index.html) package to put 
+the pies over this map:
+
+~~~
+> ggplot(mi.world, mapping = aes(x = long, y = lat, group = group))+
+    geom_polygon(fill= "gray",colour = "black")+
+    xlab("Longitude") + ylab("Latitude") + theme_bw()+ 
+    coord_fixed(xlim = samp.sites$longitude,
+                ylim = samp.sites$latitude,
+                expand = TRUE) +
+    geom_scatterpie(data = scatter.data, cols = unique(b), 
+                    pie_scale = 0.6,
+                    aes(x= Longitude , y = Latitude, color = Plant))+
+    scale_fill_manual(values = samp.colors) +
+    scale_color_manual(aesthetics = c("color"),values = plant.colors)
+  ggsave(filename = paste("03-06-MapWPies","png",sep = "."),dpi = 1200, 
+         path = "figures/", width = 30, height = 15, units = "cm")
+~~~
+{: .language-r}
+
+<img src="/clavibacter/figures/03-06-MapWPies.png">
+
+As you can see, there is still an issue with this plot because we have more than 
+one sample with the same coordinates and the pie-charts overlap.
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
