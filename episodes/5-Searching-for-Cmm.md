@@ -34,6 +34,10 @@ NCBI:
 | sepedonicus | [link](https://ncbi.nlm.nih.gov/assembly?LinkName=genome_assembly&from_uid=64931) | 3 |
 |-------------------+-------------------------------------------------------------------------------------------------------------------|
 
+The reference genomes are located inside the `data/reference/clavi-genomes/` 
+[folder of the repository](https://github.com/Bedxxe/clavibacter/tree/main/data/reference/clavi-genomes).
+
+
 I also used a reference genome of [Cmm](https://github.com/Bedxxe/clavibacter/blob/main/data/reference/cmm/cmm-contigs.fa)
 
 With this amassed database, I faced a problem. Each one of them has its own 
@@ -169,18 +173,21 @@ insidiosus_LMG_3663.fna    nebraskensis_DOAB_395.fna
 ~~~
 {: .output}
 
-I will take the _Capsicum_ data to do a first try. As I explored the data, I 
-became aware that in the _Capsicum_ samples, one of the dominant OTUs was 
+
+As I explored the data, I became aware that in the _Capsicum_ and _Tuberosum_ 
+samples, one of the dominant OTUs was 
 [_Agrobacterium tumefaciens_](https://github.com/Bedxxe/clavibacter/blob/main/data/outgrups/Agrobacterium_tumefaciens_LN-1.fna) :
 
-<img src="/clavibacter/figures/capsicum-tuberosum-exp.png" >
-<em> Figure 1. Barplot of dominant OTUs from _Capsicum_ and _Tuberosum_ libraries <em/>
+<img src="/clavibacter/figures/05-01-dominantGenus.png" >
 
+In order to see if this obtained reads do not belong to this dominant population, 
+I add the _Agrobacterium tumefaciens_ to the database.
 
-I will add also an outgroup-like genome from [_Nostoc desertorum_](https://github.com/Bedxxe/clavibacter/blob/main/data/outgrups/Nostoc_desertorum_CM1_VF14.fna).
+I will also add an outgroup-like genome from [_Nostoc desertorum_](https://github.com/Bedxxe/clavibacter/blob/main/data/outgrups/Nostoc_desertorum_CM1_VF14.fna).
 
 With these genomes I will create a Blast database. First I will concatenate all 
-this genomes in one big file and then I will run the code to do the database:
+this genomes in one big file and then I will run the next lines of code to do 
+the BLAST database:
 
 ~~~
 $  cat trim-c-genomes/* outgroups/* > all-genomes.fasta
@@ -188,11 +195,128 @@ $  makeblastdb -in ../reference/all-genomes.fasta -dbtype nucl -out all-clavi-g/
 ~~~
 {: .language-bash}
 
+Now that we have all we need to try a Blast of the "Cmm" extracted-reads, I will 
+take the `Capsicum/choi-2020` data to try this. I will create a directory at the same level 
+as `all-clavi-g/` directory, and I will name it `capsi-choi/`. Here I will copy 
+the extracted Cmm from `choi-2020/` inside a folder named `extracted-cmm-choi/`. If we explore one of these files, we will see that is composed for a set of reads:
 
 ~~~
+$ head -n15 extracted-cmm-choi/cmm-capsi-choi-2020-SRR12778013-1.fasta
+~~~
+{: .language-bash}
 
+~~~
+>SRR12778013.32167716 32167716 length=151
+TCGTCATCGACTGCCCCAACCGGCAGGGCGGCCCCCTCACCCTCTCCGCCCTCAACGCCG
+CCGACACCGTCGTCTACGCCGCCACCCCCAGCGGCGACGGCGTCGACGGCGTCGCCGGCG
+CCCGCCGCACCGTCGACCAGTTCCGGATCAA
+>SRR12778013.32168284 32168284 length=151
+TCGTCATCGACTGCCCCAACCGGCAGGGCGGCCCCCTCACCCTCTCCGCCCTCAACGCCG
+CCGACACCGTCGTCTACGCCGCCACCCCCAGCGGCGACGGCGTCGACGGCGTCGCCGGCG
+CCCGCCGCACCGTCGACCAGTTCCGGATCAA
+>SRR12778013.32987997 32987997 length=151
+TTGTGATCGGAGACCTCGTCGCGCAGCCGGGCGGCCAACTCGAACTTGAGTTCGCCGGCG
+GCGATGAGCATCTGGGCGTTGAGATCCTCGATGATCGCCTCGAGCTCGGCACCGCCCGAG
+GCGCCCTTCGCGCCCGAGCCCAGCGACGGGG
+>SRR12778013.34496501 34496501 length=151
+ACGTCGTCGTGTACTGCTGGGGCCCCGGCTGCAACGGCAGCACCCGCGCCGGCCTCGCCC
+TCGCGCTCGCGGGCTACGGCCGCGTGAAGGAGCTGGTCGGCGGCTACGAGTACTGGGTCC
 ~~~
 {: .output}
+
+In order to separe each sequence in a file, I have prepared a little program 
+`dividing-ind-reads.sh`
+
+~~~
+$ cat dividing-ind-reads.sh
+~~~
+{: .language-bash}
+
+~~~
+# !/bin/bash
+
+#This program is ment to separate the reads of a fasta file. In order to 
+#work, the read header must begin with a '>' as the next example:
+# >SRR13319511.872821 872821 length=101
+
+#This little program asks for the folder where the fasta files are located
+
+fas=$1 # folder where the fasta files are located
+
+#CREATE A FOLDER TO CONTAIN THE READS
+mkdir -p $fas/ind-reads
+
+#EXTRACTING THE INDIVIDUAL READS
+ls $fas | grep -v 'ind-reads'| while read line; do name=$(echo $line | cut -d'.' -f1);
+file=$(echo $line);
+grep '>' $fas/$file | while read line; do ref=$(echo $line| cut -d' ' -f1| cut -d'.' -f2);
+grep "$line" $fas/$file -A 3 > ind-temp.fasta;
+echo ">"$name-$ref > $name-$ref.fasta;
+grep 'G' ind-temp.fasta >> $name-$ref.fasta;
+rm ind-temp.fasta;
+mv $name-$ref.fasta $fas/ind-reads;
+done;done
+~~~
+{: .language-bash}
+
+I will use this program to divide the sequences of each of the `fasta` files inside 
+the `extracted-cmm-choi/` direcotry:
+
+~~~
+$ sh dividing-ind-reads.sh extracted-cmm-choi
+$ ls extracted-cmm-choi/ind-reads/ | wc -l
+~~~
+{: .language-bash}
+
+~~~
+7392
+~~~
+{: .output}
+
+Now we are ready to do the BLAST with the mock microbiome that we amassed. I 
+prepared another little program to do the blast, `sec-blast.sh`:
+
+~~~
+$ cat sec-blast.sh
+~~~
+{: .language-bash}
+
+~~~
+# !/bin/bash
+
+#This program is ment to do a Blast search of a set of files on a database.
+# The user needs to specify 1) where is located that database and 2) the 
+#location of the sequences that are going to be submitted to blast
+
+db=$1 #Location of the database to do the blast
+seq=$2 #Location of the sequences to blast
+
+mkdir output-blast
+
+ls $seq | while read line; do name=$(echo $line | cut -d'.' -f1);
+for i in 0.000001 ; do mkdir -p output-blast/$i;
+blastn -db $db -query $seq/$line -outfmt "6 sseqid slen qstart qend bitscore evalue sseq " -evalue $i -num_threads 12 -out output-blast/$i/$name;
+done;done
+~~~
+{: .language-bash}
+
+It is important to note that one of the advantages of the `-outfmt 6` of BLAST is 
+that one can [customize the output](https://www.metagenomics.wiki/tools/blast/blastn-output-format-6) . We are asking for 6 parameters:
+
+* sseqid:	Subject Seq-id
+* slen:		Subject sequence length		
+* qstart:	Start of alignment in query
+* qend:		End of alignment in query
+* bitscore:	Bit score
+* evalue:	Expect value
+* sseq: 	Aligned part of subject sequence
+
+~~~
+$ sh sec-blast.sh ../all-clavi-g/all-genomes extracted-cmm-choi/ind-reads/
+~~~
+{: .language-bash}
+
+It will take a long time since we got a great amount of sequences
 
 ~~~
 
@@ -202,7 +326,12 @@ $  makeblastdb -in ../reference/all-genomes.fasta -dbtype nucl -out all-clavi-g/
 ~~~
 
 ~~~
-{: .output}
+{: .language-bash}
+
+~~~
+
+~~~
+{: .language-bash}
 
 ~~~
 $ makeblastdb -in ../reference/cmm/cmm.fna -dbtype nucl -out cmm/ndatabase/cmm
@@ -244,6 +373,38 @@ ls -l output-blast/0.000001/ |  grep " 0 May 27" | while read line; do file=$(ec
 
 ~~~
 {: .language-bash}
+
+
+~~~
+
+~~~
+{: .language-bash}
+
+~~~
+
+~~~
+{: .output}
+
+~~~
+
+~~~
+{: .language-bash}
+
+~~~
+
+~~~
+{: .output}
+
+~~~
+
+~~~
+{: .language-bash}
+
+~~~
+
+~~~
+{: .output}
+
 
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
