@@ -17,6 +17,8 @@ Cmm. The reads separation was made by the `kraken2` algorithm using its database
 The main issue is if this sequences are really from Cmm and not from one of the 
 other subspecies fo _Clavibacter michiganensis_. 
 
+## The mock microbiome database
+
 I downloaded a set of genomes of the michiganensis subspecies from the 
 NCBI:
 
@@ -39,6 +41,9 @@ The reference genomes are located inside the `data/reference/clavi-genomes/`
 
 
 I also used a reference genome of [Cmm](https://github.com/Bedxxe/clavibacter/blob/main/data/reference/cmm/cmm-contigs.fa)
+
+
+## Correction of the genomes files
 
 With this amassed database, I faced a problem. Each one of them has its own 
 header/label nomenclature for each read/contig/scaffold. For example, the 
@@ -173,6 +178,7 @@ insidiosus_LMG_3663.fna    nebraskensis_DOAB_395.fna
 ~~~
 {: .output}
 
+### The outgroups
 
 As I explored the data, I became aware that in the _Capsicum_ and _Tuberosum_ 
 samples, one of the dominant OTUs was 
@@ -190,10 +196,13 @@ this genomes in one big file and then I will run the next lines of code to do
 the BLAST database:
 
 ~~~
-$  cat trim-c-genomes/* outgroups/* > all-genomes.fasta
-$  makeblastdb -in ../reference/all-genomes.fasta -dbtype nucl -out all-clavi-g/all-genomes
+$ cat trim-c-genomes/* outgroups/* > all-genomes.fasta
+$ cd ../blast
+$ makeblastdb -in ../reference/all-genomes.fasta -dbtype nucl -out databases/all-genomes
 ~~~
 {: .language-bash}
+
+## Dividing the files of individual reads
 
 Now that we have all we need to try a Blast of the "Cmm" extracted-reads, I will 
 take the `Capsicum/choi-2020` data to try this. I will create a directory at the same level 
@@ -273,6 +282,8 @@ $ ls extracted-cmm-choi/ind-reads/ | wc -l
 ~~~
 {: .output}
 
+## Exploration BLAST
+
 Now we are ready to do the BLAST with the mock microbiome that we amassed. I 
 prepared another little program to do the blast, `sec-blast.sh`:
 
@@ -312,99 +323,150 @@ that one can [customize the output](https://www.metagenomics.wiki/tools/blast/bl
 * sseq: 	Aligned part of subject sequence
 
 ~~~
-$ sh sec-blast.sh ../all-clavi-g/all-genomes extracted-cmm-choi/ind-reads/
+$ sh sec-blast.sh ../databases/all-genomes extracted-cmm-choi/ind-reads/
 ~~~
 {: .language-bash}
 
-It will take a long time since we got a great amount of sequences
+It will take a long time since we got a great amount of sequences to process.
+At the end, if we take a look at how many of the 7392 sequences got a result, we 
+will see that more than the 75% got no output after the BLAST:
 
 ~~~
-
-~~~
-{: .language-bash}
-
-~~~
-
+$ ls -l output-blast/0.000001/ | grep ' 0 ' | wc -l
 ~~~
 {: .language-bash}
 
 ~~~
-
-~~~
-{: .language-bash}
-
-~~~
-$ makeblastdb -in ../reference/cmm/cmm.fna -dbtype nucl -out cmm/ndatabase/cmm
-~~~
-{: .language-bash}
-
-
-~~~
-
-
-Building a new DB, current time: 05/23/2022 16:15:51
-New DB name:   /home/betterlab/diego/clavibacter/blast/cmm/ndatabase/cmm
-New DB title:  ../reference/cmm/cmm.fna
-Sequence type: Nucleotide
-Keep MBits: T
-Maximum file size: 1000000000B
-Adding sequences from FASTA; added 3053 sequences in 0.0727699 seconds.
+5850
 ~~~
 {: .output}
 
+
+If I take some of these sequences with no output and sumbit them to a BLAST 
+process with all the NCBI database, I find insteresting results. Some show 
+a high identity and good e-value with other Cmm lineajes that I do not have 
+in the dabase (we only put one Cmm of reference). While others, show this 
+tendency against plasmid sequences:
+
+<img src="/clavibacter/figures/05-02-BLASToutput.png" > 
+
+
+## Adjusting the BLAST database
+
+With this information, I searched for a new set of sequences:
+
+|-------------------+-------------------------------------------------------------------------------------------------------------------|
+| Entity | Number of sequences |
+|-------------------+-------------------------------------------------------------------------------------------------------------------|
+| Cmm | 10 |
+|-------------------+-------------------------------------------------------------------------------------------------------------------|
+| Plasmids | 5 |
+|-------------------+-------------------------------------------------------------------------------------------------------------------|
+
+I obtained the Cmm genomes from the [NCBI repository](https://www.ncbi.nlm.nih.gov/assembly/?term=txid33013[Organism:exp])
+
+In order to trim their headers, I enhanced (at least I think is a better program), 
+the `changing-headers.sh` script and did a new program in `head-genomes-trim.sh`. 
+This program allows to change a great amount of genomes with only one line of code:
+
 ~~~
-cat
-cat headers.txt | while read line; do sed "s/$line/>Cmm/" cmm-contigs.fa > temp.txt; mv temp.txt cmm-contigs.fa ;done
+$ cat head-genomes-trim.sh
 ~~~
 {: .language-bash}
 
 ~~~
-$ bwa mem index/cmm-contigs.fa ../../../blast/cmm/shotg-seq/clavi-SRR13319511-1.fq ../../../blast/cmm/shotg-seq/clavi-SRR13319511-2.fq -o clavi-SRR13319511.sam
+#!/bin/sh
+# This program is to change the headers of a fasta file in order for all the
+#headers to be the same for the entire file
+# This is useful when the user want to concatenate all the genomes from a
+#database and want to know from which of the initial genomes is the
+#best match
+
+#This program ask from the user to specify 1 input: 1) the location
+#of the fasta files without the "/" character at the end
+
+gem=$1 #Location to the genomes in fasta format without the "/" character at the end
+# CREATE A DIRECTORY TO STORE THE TRIMMED GENOME
+mkdir -p $gem/trim-header-genomes
+
+ls $gem | grep -v 'trim-header-genomes' | while read line;
+do fas=$(echo $line);
+#CREATE A .TXT FILE TO STORE THE ORIGINAL HEADERS
+grep '>' $gem/$fas > heads.txt;
+cp $gem/$fas $gem/trim-header-genomes/htrim-$fas;
+#REPLACE ALL THE HEADERS FOR THE SUFFIX NAME
+cat heads.txt | while read line;
+do sed "s/$line/>$fas/" $gem/trim-header-genomes/htrim-$fas > $gem/trim-header-genomes/temp.txt;
+mv $gem/trim-header-genomes/temp.txt $gem/trim-header-genomes/htrim-$fas;
+done;done
+
+#REMOVING TEMP FILES
+rm heads.txt
 ~~~
 {: .language-bash}
 
-To delete zero-blast results
+After submitting the new sequences to this program. I will do a new BLAST database 
+to see if the number of identified sequences is better:
+
 ~~~
-ls -l output-blast/0.000001/ |  grep " 0 May 27" | while read line; do file=$(echo $line | cut -d' ' -f9); rm output-blast/0.000001/$file; done
+$  cat trim-c-genomes/* outgroups/* plasmids/trim-header-genomes/* cmm/other-cmm/trim-header-genomes/* > enhanced-datab.fasta
+$ makeblastdb -in enhanced-datab.fasta -dbtype nucl -out ../blast/databases/enhnced-datab
+~~~
+{: .language-bash}
+
+With this assembled, we will run again the BLAST with this new database. First, I 
+will move the first output to a new folder so as to not get overwritten. I will use 
+again the `sec-blast.sh`.
+
+~~~
+$ mv output-blast/ first-database-output/
+$ sh sec-blast.sh ../databases/enhnced-datab extracted-cmm-choi/ind-reads/
+~~~
+{: .language-bash}
+
+Again, since we have a lot of sequences, it will take some minutes to complete the 
+process. If we want to see the results, we will see that close to 400 sequences 
+are now identified. But we still have more than 50% of the sequences without an 
+output:
+
+~~~
+$ ls -l capsi-choi/output-blast/0.000001/ | grep ' 0 ' | wc -l
 ~~~
 {: .language-bash}
 
 ~~~
-
-~~~
-{: .language-bash}
-
-
-~~~
-
-~~~
-{: .language-bash}
-
-~~~
-
+5431
 ~~~
 {: .output}
 
-~~~
+## BLAST with the plasmid sequences
 
+It is interesting that some of the sequences presented a better e-value when 
+aligned to a plasmid sequence. I will do a database with these sequences and see 
+how many of the sequences get an output.
+
+
+~~~
+$ cat plasmids/trim-header-genomes/* > plasmids.fasta
+$ makeblastdb -in ../reference/plasmids.fasta -dbtype nucl -out ../blast/databases/plasmids
+$ sh sec-blast.sh ../databases/plasmids extracted-cmm-choi/ind-reads/
+$ ls -l output-blast/0.000001/ | grep -v ' 0 ' | wc -l
 ~~~
 {: .language-bash}
 
 ~~~
-
+11
 ~~~
 {: .output}
 
-~~~
-
-~~~
-{: .language-bash}
-
-~~~
-
-~~~
-{: .output}
-
+There are not as much as I expected, but the results are quite interesting and 
+worth noting them. In this example, I only added 5 sequences of plasmids and 10 
+Cmm lineajes. Indeed, the results were better that the former database, but more 
+than 70% of the sequences (only from Choi 2020) are still unidentified. Certainly, 
+using nucleotides usially brings less outputs than a "faraway" proximation as 
+using aminoacids. But this result suggests that across Cmm lineajes there 
+are a great amount of nucleic substitutions. Evaluate if they are synonymous or 
+nonsynonymous can be a good approach to follow.
 
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
