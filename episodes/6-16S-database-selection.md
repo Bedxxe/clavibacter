@@ -615,10 +615,12 @@ Finally, we obtained the desired image:
 
 
 <img src="/clavibacter/figures/06-06-silvaAnnot.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 6. The legend of the dominant Phyla in the Silva plot <em/>
+
+
 
 <img src="/clavibacter/figures/06-07-silvaLegend.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 7. The legend of the dominant Genera in the Silva plot <em/>
+
+
 
 I will do the same for `Greengenes` and `RDP` databases with their own 
 [scripts](https://github.com/Bedxxe/clavibacter/tree/main/scripts), `green-grafla.sh` and `rdp-grafla.sh`.
