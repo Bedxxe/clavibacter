@@ -3,12 +3,12 @@ source: md
 title: "16S database exploration"
 ---
 
-# Clavibacter project
+# 16S database exploration
+
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
 
-## Exploring the different kraken 16S databases
 
-<img src="/clavibacter/figures/fuji-from-the-platform-of-sasayedo.jpg" >
+<img src="/clavibacter/figures/view-of-fuji-from-a-boat-at-ushibori.jpg" >
 
 [kraken2](https://github.com/DerrickWood/kraken2) has the option to create databases 
 of 16S using the information from three different repositories:
@@ -20,7 +20,7 @@ I will use the data obtained from [_Medicago sativa_](https://www.ncbi.nlm.nih.g
 are any substantial differences between the taxonomic assignation using each of the 
 three databases.
 
-### Downloading the database
+## Downloading the database
 
 I prepared a folder named kraken with the next structure to download and index the 
 16S databases:
@@ -28,7 +28,7 @@ I prepared a folder named kraken with the next structure to download and index t
 ~~~
 $ tree -L 2
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 .
@@ -41,18 +41,23 @@ $ tree -L 2
 {: .output}
 
 Each of the three folders inside the `database` folder will contain a different 
-set of data. The date corresponds to the date that this databases were created 
+set of data. I named each database with the date it was created  
 since progess in bacterial taxonomic classification can bring substantial changes 
-in the future.
+in the future and an update will be needed.
 
-As an example, I used the next piece of code to download the `Greengenes` dataset:
+I used the next piece of code to download the `Greengenes`, `RPD`, and 
+`Silva` databases:
 
 ~~~
 $ kraken2-build --db gg04082022 --special greengenes --threads 12
+$ kraken2-build --db rdp04082022 --special rdp --threads 12
+$ kraken2-build --db silva04082022 --special silva --threads 12
 ~~~
-{: .bash}
+{: .language-bash}
 
-### Downloading the data 
+The `--threads` flag can be customized to fulfill hardware requirements.
+
+## Downloading the reads from public databases (NCBI)
 
 Let's first downloaded them from the [SRA](https://www.ncbi.nlm.nih.gov/Traces/study/?query_key=1&WebEnv=MCID_623f3b7a6ab7df183b59c2ab&o=acc_s%3Aa) repository in NCBI. 
 I will download the metadata table and the Accesion table. With the Accseion table I will use SRA-toolkit to download the 16S reads. I have created a 
@@ -61,33 +66,33 @@ folder structure inside the `clavibacter/16S` main folder as follows:
 ~~~
 $ tree -L 2
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 .
 ├── 16-S.Rproj
 ├── 16S-metadata
-│   ├── m-wu-2021-SRR_Acc_List.txt
-│   ├── m-wu-2021-SraRunTable.txt
-│   ├── miscellaneous-SRR_Acc_List.txt
-│   ├── miscellaneous-SraRunTable.txt
-│   ├── miscellaneous-tuberosum-SRR_Acc_List.txt
-│   ├── miscellaneous-tuberosum-SraRunTable.txt
-│   ├── shi-2019-SRR_Acc_List.txt
-│   └── shi-2019-SraRunTable.txt
+│   ├── m-wu-2021-SRR_Acc_List.txt
+│   ├── m-wu-2021-SraRunTable.txt
+│   ├── miscellaneous-SRR_Acc_List.txt
+│   ├── miscellaneous-SraRunTable.txt
+│   ├── miscellaneous-tuberosum-SRR_Acc_List.txt
+│   ├── miscellaneous-tuberosum-SraRunTable.txt
+│   ├── shi-2019-SRR_Acc_List.txt
+│   └── shi-2019-SraRunTable.txt
 ├── medicago-sativa
-│   ├── kraken-reads-v032822.sh
-│   ├── kraken-reads-v042822.sh
-│   ├── miscellaneous
-│   ├── miscellaneous-SRR_Acc_List.txt
-│   └── miscellaneous-SraRunTable.txt
+│   ├── kraken-reads-v032822.sh
+│   ├── kraken-reads-v042822.sh
+│   ├── miscellaneous
+│   ├── miscellaneous-SRR_Acc_List.txt
+│   └── miscellaneous-SraRunTable.txt
 ├── tuberosum
-│   ├── miscellaneous-tuberosum
-│   ├── miscellaneous-tuberosum-SRR_Acc_List.txt
-│   ├── miscellaneous-tuberosum-SraRunTable.txt
-│   ├── shi-2019
-│   ├── shi-2019-SRR_Acc_List.txt
-│   └── shi-2019-SraRunTable.txt
+│   ├── miscellaneous-tuberosum
+│   ├── miscellaneous-tuberosum-SRR_Acc_List.txt
+│   ├── miscellaneous-tuberosum-SraRunTable.txt
+│   ├── shi-2019
+│   ├── shi-2019-SRR_Acc_List.txt
+│   └── shi-2019-SraRunTable.txt
 └── zea-mayz
     ├── m-wu-2021
     ├── m-wu-2021-SRR_Acc_List.txt
@@ -103,7 +108,7 @@ were I will download the data from the NCBI with the next command:
 $ cat metadata/SRR_Acc_List.txt | while read line; do fasterq-dump $line -S -p -e 12; done
 $ ls *.fastq | wc -l
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 36
@@ -120,7 +125,7 @@ Let's see the structure of the file:
 ~~~
 $ head -n 5 metadata/SraRunTable.txt
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 Run,Assay Type,AvgSpotLen,Bases,BioProject,BioSample,BioSampleModel,Bytes,Center Name,Collection_date,Consent,DATASTORE filetype,DATASTORE provider,DATASTORE region,env_broad_scale,env_local_scale,env_medium,Experiment,geo_loc_name_country,geo_loc_name_country_continent,geo_loc_name,HOST,Instrument,Lat_Lon,Library Name,LibraryLayout,LibrarySelection,LibrarySource,Organism,Platform,ReleaseDate,Sample Name,SRA Study
@@ -138,7 +143,7 @@ files has.
 ~~~
 $ cat metadata/SraRunTable.txt| sed -n '1!p' | while read line; do read=$(echo $line | cut -d',' -f1); echo $read;done
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 SRR15081053
@@ -165,20 +170,21 @@ SRR15081085
 This is going to be useful also to obtain all the other columns of information 
 inside the `SraRunTable.txt` file.
 
-### Taxonomic assignation with the three databases
+## Taxonomic assignation with the three databases
 
 In order to correctly annotate with the three different databases, I will create a 
 folder where I will save the output of each of the processes with kraken2. I will 
 create the `greengenes`, `rdp`, and `silva` folders to serve this purpose. 
 
 I prepared a little program that will obtain the needed information from each read 
-to run the kraken2 algorithm and to allocate the outputs in different folders: 
-`kraken-reads.sh`. This script can be locates on the [scripts folder]() of this repository.
+to run the kraken2 algorithm and to allocate the outputs in different folders, 
+this program is a variant of the `all-around.sh` that I have created along the 
+other episodes: `16-all-around.sh`. This script can be locates on the [scripts folder]() of this repository.
 Let's see what is inside:
 ~~~
-$ cat kraken-reads.sh
+$ cat 16-all-around.sh
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 #!/bin/sh
@@ -187,62 +193,101 @@ $ cat kraken-reads.sh
 
 # This program requires that you give 3 input data. 1) where this
 #SraRunTable is located, 2) where the kraken database has been saved,
-#and 3) where the reads are located.
+# 3) a sufix that you want for the files to have (from the biom file, and to the extracted reads) and
+# 4) The name of the author of the work
 
-metd=$1 #Location to the SraRunTable.txt file
+metd=$1 #Location to the SraRunTable.txt
 kdat=$2 #Location of the kraken2 database
-runs=$3 #Location where the reads are hoarded. Without the / symbol
+sufx=$3 #The choosen suffix for some files
+aut=$4 #Author's name
 root=$(pwd) #Gets the path to the directory of this file, on which the outputs ought to be created
+# Now we will define were the reads are:
+runs='reads'
+
+# CREATING NECCESARY FOLDERS
+mkdir reads
+mkdir -p reads/clavi/
+mkdir -p reads/cmm/
+mkdir -p reads/fasta-clavi
+mkdir -p taxonomy/kraken
+mkdir -p taxonomy/taxonomy-logs/scripts
+mkdir -p taxonomy/kraken/reports
+mkdir -p taxonomy/kraken/krakens
+mkdir -p taxonomy/biom-files
+
+
+# DOWNLOADING THE DATA
+
+#Let's use the next piece of code to download the data
+cat $metd  |  sed -n '1!p' | while read line;  do read=$(echo $line | cut -d',' -f1); fasterq-dump -S $read -p -e 8 -o $read ; done
+mv *.fastq reads/
+
+# MANAGING THE DATA
 
 # We will change the names of the reads files. They have a sufix that makes impossible
 #to be read in a loop
 ls $runs | while read line ; do new=$(echo $line | sed 's/_/-/g'); mv $runs/$line $runs/$new; done
 
 # Now, we will create a file where the information of the run labes can be located
-cat $metd | sed -n '1!p' | while read line; do read=$(echo $line | cut -d',' -f1); echo $read ; done > run-labels.txt
+cat $metd  | while read line; do read=$(echo $line | cut -d',' -f1); echo $read ; done > run-labels.txt
 mv run-labels.txt metadata/
 
-mkdir -p taxonomy/kraken
-mkdir -p taxonomy/taxonomy-logs/scripts
-mkdir -p taxonomy/kraken/reports
-mkdir -p taxonomy/biom-files
+# TAXONOMIC ASSIGNATION WITH KRAKEN2
 
-cat metadata/run-labels.txt | while read line; do mkdir taxonomy/kraken/$line; file1=$(echo $runs/$line-1.fastq); file2=$(echo $runs/$line-2.fastq) ; echo '\n''working in run' "$line"\
-#kraken2 --db $kdat --threads 12 --paired $file1 $file2 --output taxonomy/kraken/$line/$line.kraken --report taxonomy/kraken/$line/$line.report \
-echo '#!/bin/sh''\n''\n'"kraken2 --db $kdat --threads 12 --paired" "$runs/$line"'-1.fastq' "$runs/$line"'-2.fastq' "--output taxonomy/kraken/$line/$line.kraken --report taxonomy/kraken/$line/$line.report" > taxonomy/taxonomy-logs/scripts/$line-kraken.sh; sh taxonomy/taxonomy-logs/scripts/$line-kraken.sh \
-cp taxonomy/kraken/$line/$line.report taxonomy/kraken/reports;done
+cat metadata/run-labels.txt | while read line; do file1=$(echo $runs/$line-1.fastq); file2=$(echo $runs/$line-2.fastq) ; echo '\n''working in run' "$line"\
+#kraken2 --db $kdat --threads 6 --paired $file1 $file2 --output taxonomy/kraken/krakens/$line.kraken --report taxonomy/kraken/reports/$line.report \
+echo '#!/bin/sh''\n''\n'"kraken2 --db $kdat --threads 6 --paired" "$runs/$line"'-1.fastq' "$runs/$line"'-2.fastq' "--output taxonomy/kraken/krakens/$line.kraken --report taxonomy/kraken/reports/$line.report" > taxonomy/taxonomy-logs/scripts/$line-kraken.sh; sh taxonomy/taxonomy-logs/scripts/$line-kraken.sh; done
+
+#CREATING THE BIOM FILE
+
+# Now we will create the biom file using kraken-biom
+kraken-biom taxonomy/kraken/reports/* --fmt json -o taxonomy/biom-files/$sufx.biom
+
+# EXTRACTING THE CLAVIBACTER READS
+
+# With the next piece of code, the reads clasiffied as from the genus "Clavibacter", will be separated from the main reads.
+# The number needed for the extraction is the numeric-ID given to Clavibacter by kraken2: 1573
+#EXTRACT THE READS IN FASTQ FORMAT
+cat metadata/run-labels.txt | while read line;
+do echo "\nExtracting Clavibacter reads in fastq from sample:" $line;
+extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/kraken/reports/$line.report -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/clavi/$sufx-$aut-$line-clav-1.fq -o2 reads/clavi/$sufx-$aut-$line-clav-2.fq -t 1573 --fastq-output --include-children; done
+
+#EXTRACT THE READS IN FASTA FORMAT
+cat metadata/run-labels.txt | while read line;
+do echo "\nExtracting Clavibacter reads in fasta from sample:" $line;
+extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/kraken/reports/$line.report -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/fasta-clavi/$sufx-$aut-$line-clav-1.fasta -o2 reads/fasta-clavi/$sufx-$aut-$line-clav-2.fasta -t 1573 --include-children; done
+
+# EXTRACTING THE CLAVIBACTER MICHIGANESIS-MICHIGANENSIS READS
+
+# With the next piece of code, the reads clasiffied as from the Clavibacter michiganensis michiganensis, will be separated from the main reads.
+# The number needed for the extraction is the numeric-ID given to Cmm by kraken2: 33013
+
+cat metadata/run-labels.txt | while read line;
+do echo "\nExtracting Cmm reads in fasta format from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/kraken/reports/$line.report -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/cmm/cmm-$sufx-$aut-$line-1.fq -o2 reads/cmm/cmm-$sufx-$aut-$line-2.fq -t 33013 --include-children; done
 ~~~
-{: .output}
+{: .language-bash}
 
-There are somethings that I would like to highlight on this little program. As it says in the first lines, you will need to provide it with 1) the location of your 
-`SraRunTable.txt` file, 2) the location of your `kraken2` database, and 3) location where you located your reads. This program will create in your actual directory 
-the folders where the outputs are going to be allocated and little pieces of code in the `taxonomy-logs/scripts` folder that were used to run `kraken2` on each 
-pair of reads.
-
-The 26th line is commented because I could not made `kraken2` to run inside the `while loop`. If you can find any solutions or any improvements, please let me know.
 
 You can always change the number of threads to be used.
 
 So, in my case I am going to run it with the following command to run kraken2 with 
 the `Greengenes` database:
 ~~~
-$ sh kraken-reads.sh metadata/SraRunTable.txt /mnt/d/programs/kraken/database/gg04082022 reads
+$ sh kraken-all.sh metadata/SraRunTable.txt /mnt/d/programs/kraken/database/gg04082022 medicago misce 
 ~~~
-{: .bash}
+{: .language-bash}
 ~~~
 working in run SRR15081053
-reads/SRR15081053-1.fastq reads/SRR15081053-2.fastq
 Loading database information... done.
-60417 sequences (29.85 Mbp) processed in 3.700s (979.6 Kseq/m, 483.93 Mbp/m).
-  60403 sequences classified (99.98%)
-  14 sequences unclassified (0.02%)
+60417 sequences (29.85 Mbp) processed in 2.690s (1347.6 Kseq/m, 665.72 Mbp/m).
+  60400 sequences classified (99.97%)
+  17 sequences unclassified (0.03%)
 
 working in run SRR15081054
-reads/SRR15081054-1.fastq reads/SRR15081054-2.fastq
 Loading database information... done.
-68119 sequences (33.72 Mbp) processed in 3.412s (1197.9 Kseq/m, 592.97 Mbp/m).
-  68109 sequences classified (99.99%)
-  10 sequences unclassified (0.01%)
+68119 sequences (33.72 Mbp) processed in 3.005s (1360.0 Kseq/m, 673.20 Mbp/m).
+  68019 sequences classified (99.85%)
+  100 sequences unclassified (0.15%)
 ~~~
 {: .output}
 
@@ -253,29 +298,14 @@ In the end, we will have new content inside our new `taxonomy` folder:
 ~~~
 $ tree -L 2
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 .
 ├── kraken
-│   ├── SRR15081054
-│   ├── SRR15081056
-│   ├── SRR15081057
-│   ├── SRR15081058
-│   ├── SRR15081059
-│   ├── SRR15081060
-│   ├── SRR15081061
-│   ├── SRR15081062
-│   ├── SRR15081076
-│   ├── SRR15081078
-│   ├── SRR15081079
-│   ├── SRR15081080
-│   ├── SRR15081081
-│   ├── SRR15081082
-│   ├── SRR15081083
-│   ├── SRR15081084
-│   ├── SRR15081085
-│   └── reports
+│   ├── biom-files
+│   ├── krakens
+│   └── reports
 └── taxonomy-logs
     └── scripts
 ~~~
@@ -286,6 +316,8 @@ going to copy the information inside `taxonomy` to the `greengenes` folder to
 continue with the new database and not re-write the information.
 
 After running this code a third time with the `Silva` database, I have all the required information. 
+
+## Taxonomic analysis in R
 
 ### Using kraken-tools to create biom files
 
@@ -298,7 +330,7 @@ next line of code can be used to create the one inside the `greengenes` folder:
 $ kraken-biom kraken/reports/* -o ../bioms/greengenes.biom --fmt json
 $ ls ../bioms/*.biom
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 greengenes.biom
@@ -416,8 +448,8 @@ And use the next code to create a bar-plot:
 ~~~
 {: .language-r}
 
-<img src="/clavibacter/figures/database-comparison.png" alt="bar-plot of the OTU quantity according to each of the three databases used. The color on each bar depicts if the database was able to classify to the species level, green for the one who did it (i.e. greengenes) and dark-orange for the ones that did not." >
-<em> Figure 1. Bar-plot of the number of OTUs classified for each database <em/>
+<img src="/clavibacter/figures/06-01-databaseComparison.png" alt="bar-plot of the OTU quantity according to each of the three databases used. The color on each bar depicts if the database was able to classify to the species level, green for the one who did it (i.e. greengenes) and dark-orange for the ones that did not." >
+
 
 The number of reads deceted is important, but it is also important which OTUs can 
 be detected with each of the databases. I am going to see which Phyla are being 
@@ -473,10 +505,10 @@ information.
     scale_fill_gradient(high = "#5ab4ac" ,low = "#000000" )+
     theme_bw() + theme(text = element_text(size = 30))
 ~~~
-{: .output}
+{: .language-r}
 
-<img src="/clavibacter/figures/phyla-present.png" alt="Heatmap where each of the squares inside is depicitng if the correspondig database in the x-axis had identified the Phyla on the y-axis. If the color is black, it means that it the database could not identity that Phylum." >
-<em> Figure 2. Heatmap pf the Phyla idenfitied by each database <em/>
+<img src="/clavibacter/figures/06-02-phylaPresent.png" alt="Heatmap where each of the squares inside is depicitng if the correspondig database in the x-axis had identified the Phyla on the y-axis. If the color is black, it means that it the database could not identity that Phylum." >
+
 
 I would like to see how much *Clavibacter* reads were identified by each database. 
 I will extract the *Clavibacter* data from all the phyloseq objects and trim the 
@@ -505,8 +537,8 @@ And I will use this information to draw a new bar-plot:
 ~~~
 {: .language-r}
 
-<img src="/clavibacter/figures/clavi-otus.png" alt="Bar-plot of the quantity of OTUS detected by each of the three databases. As can be seen, Greengenes was the one that identified more OTUs of this bacterial group of interest" >
-<em> Figure 3. Bar-plot of *Clavibacter* OTUs <em/>
+<img src="/clavibacter/figures/06-03-claviOTUs.png" alt="Bar-plot of the quantity of OTUS detected by each of the three databases. As can be seen, Greengenes was the one that identified more OTUs of this bacterial group of interest" >
+
 
 Finally, I would like to see how the *Clavibacter* OTUs are distributed on the 
 Greengenes results, since this database was able to reach the Species level.
@@ -518,11 +550,11 @@ Greengenes results, since this database was able to reach the Species level.
 ~~~
 {: .language-r}
 
-<img src="/clavibacter/figures/heat-clavi.png" alt="Heatmap pf the Clavibacter OTUs detected. As can be seen, no othe Species was identified apart from michiganensis. This was true for all the samples" >
-<em> Figure 4. Heatmap of Greengenes assignation of *Clavibacter* Species <em/>
+<img src="/clavibacter/figures/06-04-heatClavi.png" alt="Heatmap pf the Clavibacter OTUs detected. As can be seen, no othe Species was identified apart from michiganensis. This was true for all the samples" >
 
 
-### Using Graphlan to create plots to compare the taxonomic assignation
+
+## Using Graphlan to create plots to compare the taxonomic assignation
 
 I have wrote a [markdown](https://bedxxe.github.io/From-kraken-to-graphlan/) explaining the process to use the `kraken` outputs to plot 
 a dendogram using `graphlan`. I will use that knowledge to plot what I obtained 
@@ -537,7 +569,7 @@ $ mkdir mpa-files
 $ ls ../kraken/reports/ | while read line; do name=$(echo $line | cut -d'.' -f1); kreport2mpa.py -r ../kraken/reports/$line -o mpa-files/$name.mpa; done
 $ ls mpa-files/
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 SRR15081053.mpa  SRR15081058.mpa  SRR15081062.mpa  SRR15081080.mpa  SRR15081084.mpa
@@ -551,7 +583,7 @@ With this information, I will combine all into a big file called `combine.mpa`
 ~~~
 $ combine_mpa.py --input mpa-files/*.mpa --output mpa-files/combine.mpa
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
  Number of files to parse: 18
@@ -564,7 +596,7 @@ I will use the [script](https://github.com/Bedxxe/clavibacter/tree/main/scripts)
 ~~~
 $ sh silva-grafla.sh
 ~~~
-{: .bash}
+{: .language-bash}
 
 ~~~
 Output files saved inside grap-files folder
@@ -579,19 +611,22 @@ Generating the .png file
 
 Finally, we obtained the desired image:
 
-<img src="/clavibacter/figures/silva-graphlan_graph.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
-<em> Figure 5. Cladogram using Silva database <em/>
+<img src="/clavibacter/figures/06-05-silvaGraph.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
 
-<img src="/clavibacter/figures/silva-graphlan_graph_annot.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
+
+<img src="/clavibacter/figures/06-06-silvaAnnot.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
 <em> Figure 6. The legend of the dominant Phyla in the Silva plot <em/>
 
-<img src="/clavibacter/figures/silva-graphlan_graph_legend.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
+<img src="/clavibacter/figures/06-07-silvaLegend.png" alt="Dendogram of the taxonomic classification obtained with the silva database of the 18 samples" >
 <em> Figure 7. The legend of the dominant Genera in the Silva plot <em/>
 
 I will do the same for `Greengenes` and `RDP` databases with their own 
 [scripts](https://github.com/Bedxxe/clavibacter/tree/main/scripts), `green-grafla.sh` and `rdp-grafla.sh`.
 
 Here is the comparative of the three generated dendograms:
-<img src="/clavibacter/figures/comparing-databases.png" alt="Dendograms of all the three databases together to compare them. A corresponds to Greengenes, B to RDP, and C to Silva" >
-<em> Figure 8. Comparation of taxonomic classification between databases. A Greengenes. B RDP. C Silva <em/>
+<img src="/clavibacter/figures/06-08-comparingDatabases.png" alt="Dendograms of all the three databases together to compare them. A corresponds to Greengenes, B to RDP, and C to Silva" >
 
+With this results, I conclude that the best database to work with will be 
+`Greengenes`.
+
+<img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
