@@ -28,6 +28,9 @@ https://bedxxe.github.io/clavibacter/episodes/6-16S-database-selection.html
 
 https://bedxxe.github.io/clavibacter/episodes/7-16S-Taxonomic-exploration-R.html
 
+https://bedxxe.github.io/clavibacter/episodes/8-Automatization.html
+
+
 ![changuito-tavehua](https://user-images.githubusercontent.com/67386612/166823738-87a8da81-11d4-4dcb-88f9-06206c5bd824.png)
 
 
