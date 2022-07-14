@@ -166,7 +166,6 @@ extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/krak
 
 cat metadata/run-labels.txt | while read line;
 do echo "\nExtracting Cmm reads in fasta format from sample:" $line; extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/kraken/reports/$line.report -s1 reads/$line-1.fastq -s2 reads/$line-2.fastq -o reads/cmm/cmm-$pref-$aut-$line-1.fasta -o2 reads/cmm/cmm-$pref-$aut-$line-2.fasta -t 33013 --include-children; done
-
 ~~~
 {: .language-bash}
 
@@ -312,17 +311,9 @@ extract_kraken_reads.py -k taxonomy/kraken/krakens/$line.kraken -r taxonomy/krak
 ~~~
 {: .language-bash}
 
-As all the other scripts, this will be located in the [scripts folder]()
+As all the other scripts, this will be located in the [scripts folder](https://github.com/Bedxxe/clavibacter/tree/main/scripts)
 of the repository.
 
-
-## What if the user provides the kraken-reports
-
-
-~~~
-
-~~~
-{: .language-bash}
 
 
 <img src="/clavibacter/figures/grecas-mitla1.png" alt="Picture of the fretwork on the ruins in Mitla, Oaxaca." >
