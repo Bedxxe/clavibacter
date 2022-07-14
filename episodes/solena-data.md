@@ -477,19 +477,25 @@ Next, there are two tables where the results for each taxonomic level is shown:
 
 ### Beta diversity
 
-
-
-~~~
-
-~~~
-{: .language-r}
+That the data is is not significantly separated by the host-plant origin can be 
+seen in a NMDS ordination. First, we need to obtain the ordination with some 
+of the `phyloseq` tools:
 
 ~~~
-
+> sol.ord <- ordinate(physeq = solena, method = "NMDS", distance = "bray")
 ~~~
 {: .language-r}
 
-~~~
+With this result, we can plot the NMDS space:
 
 ~~~
+> plot_ordination(physeq = solena, ordination = sol.ord,
+                  color = "Cultivo") +
+    stat_ellipse(geom = "polygon", alpha = 0.2, aes(fill = Cultivo))+
+    geom_point(size=5 , alpha = 0.5)+
+    theme(text = element_text(size = 18))
+~~~
 {: .language-r}
+
+
+<img src="/clavibacter/figures/sol-08.png" >
