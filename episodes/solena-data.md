@@ -112,7 +112,7 @@ rm after-$sufx.txt
 rm before-$sufx.txt
 rm clavi.txt
 ~~~
-{: .output}
+{: .language-bash}
 
 Inside the `reports` folder, I will use the next line to run the program on all the reads:
 
