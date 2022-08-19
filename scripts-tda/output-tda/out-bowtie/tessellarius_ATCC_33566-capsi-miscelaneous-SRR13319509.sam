@@ -1,0 +1,6 @@
+@HD	VN:1.0	SO:unsorted
+@SQ	SN:NZ_CP040788.1	LN:3254008
+@SQ	SN:NZ_CP040789.1	LN:29539
+@SQ	SN:NZ_CP040790.1	LN:45791
+@SQ	SN:NZ_CP040791.1	LN:37356
+@PG	ID:bowtie2	PN:bowtie2	VN:2.4.2	CL:"/opt/anaconda3/envs/metagenomics/bin/bowtie2-align-s --wrapper basic-0 -x genomas-clavi/clavi-genomes/index-bowtie/tessellarius_ATCC_33566 -p 12 --passthrough -1 ex-reads-clavi/fastq/fastq/capsicum/capsi-miscelaneous-SRR13319509-clav-1.fq -2 ex-reads-clavi/fastq/fastq/capsicum/capsi-miscelaneous-SRR13319509-clav-2.fq"
