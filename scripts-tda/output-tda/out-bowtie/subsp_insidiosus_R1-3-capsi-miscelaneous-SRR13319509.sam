@@ -1,6 +1,0 @@
-@HD	VN:1.0	SO:unsorted
-@SQ	SN:NZ_CP021034.1	LN:3193464
-@SQ	SN:NZ_CP021035.1	LN:47291
-@SQ	SN:NZ_CP021036.1	LN:48316
-@SQ	SN:NZ_CP021037.1	LN:102376
-@PG	ID:bowtie2	PN:bowtie2	VN:2.4.2	CL:"/opt/anaconda3/envs/metagenomics/bin/bowtie2-align-s --wrapper basic-0 -x genomas-clavi/clavi-genomes/index-bowtie/subsp_insidiosus_R1-3 -p 12 --passthrough -1 ex-reads-clavi/fastq/fastq/capsicum/capsi-miscelaneous-SRR13319509-clav-1.fq -2 ex-reads-clavi/fastq/fastq/capsicum/capsi-miscelaneous-SRR13319509-clav-2.fq"
