@@ -1,2 +1,8 @@
 ex-reads-clavi/fastq/
 scripts-tda/genomas-clavi/
+scripts-tda/reads-simulados100M.fastq
+scripts-tda/MapeoReads-organismos.csv
+scripts-tda/output-tda/
+scripts-tda/output-tda/prueba-3genomas/bam/
+scripts-tda/output-tda/prueba-3genomas/out-bowtie/ex-reads-clavi/fastq/
+scripts-tda/genomas-clavi/
