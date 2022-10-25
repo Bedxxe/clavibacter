@@ -6,5 +6,5 @@ for infile in output-tda/$fol/sorted/*.sam
 do 
 	base=$(basename ${infile} .sam)
 	head -4 ${infile} > output-tda/$fol/sam_extract/${base2}-${base}.bam  #get the head the .sam file's
-	samtools view ${infile} | grep -f "${file}" >> output-tda/$fol/sam_extract/${base2}-${base}.bam # append the read selected 
+	samtools view ${infile} | grep -P "${file}\t" >> output-tda/$fol/sam_extract/${base2}-${base}.bam # append the read selected 
 	done
