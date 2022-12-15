@@ -539,8 +539,13 @@ methodology:
   return(z)
 }
 > z<- edgeRnorm(cbact, method = "TMM")
+> # Defining the new phyloseq object after normalization
+> nor.data.z <- z@.Data[[1]]
+> for (i in 1:(length(z@.Data[[2]]$norm.factors))) {
+   nor.data.z[,i] <- nor.data.z[,i]*z@.Data[[2]]$norm.factors[i]
+> }
 > #-- Merging all the objects in the new normalized phyloseq object --#
-> nor.cb <- merge_phyloseq(otu_table(z@.Data[[1]], taxa_are_rows = TRUE),
+> nor.cb <- merge_phyloseq(otu_table(nor.data.z, taxa_are_rows = TRUE),
                          tax_table(cbact@tax_table@.Data),
                          cbact@sam_data)
 > #Removing the dispensable created object
