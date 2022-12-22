@@ -1,6 +1,7 @@
 # Analysis of the data from Solena suministred to Professor Nelly Selem Mojica
 
 ## Kraken-biom
+Diego Garfias / Julio César Aquino
 
 Inside the folder that was suministred: `nelly`, I created three new folders. 
 I moved all the `*.report.txt` files inside the folder `reports`, and the two 
